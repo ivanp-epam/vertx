@@ -37,6 +37,8 @@ dependencies {
   runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.77.Final:osx-x86_64")
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+  testImplementation("org.mockito:mockito-core:4.5.1")
+  testImplementation("org.mockito:mockito-junit-jupiter:4.6.0")
 }
 
 java {

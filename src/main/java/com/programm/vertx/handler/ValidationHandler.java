@@ -18,54 +18,54 @@ import java.util.Map;
 
 public class ValidationHandler<T> implements Handler<RoutingContext> {
 
-  private final Validator<T> validator;
-  private final Class<T> clazz;
+    private final Validator<T> validator;
+    private final Class<T> clazz;
 
-  public ValidationHandler(Validator<T> validator, Class<T> clazz) {
-    this.validator = validator;
-    this.clazz = clazz;
-  }
-
-  @Override
-  public void handle(RoutingContext event) {
-    JsonObject entries = event.body().asJsonObject();
-    T object;
-
-    if (entries == null) {
-
-      try {
-        object = clazz.getDeclaredConstructor().newInstance();
-      } catch (ReflectiveOperationException e) {
-        throw new RuntimeException(e);
-      }
-
-    } else {
-      object = entries.mapTo(clazz);
+    public ValidationHandler(Validator<T> validator, Class<T> clazz) {
+        this.validator = validator;
+        this.clazz = clazz;
     }
 
-    ConstraintViolations validate = validator.validate(object);
+    @Override
+    public void handle(RoutingContext event) {
+        JsonObject entries = event.body().asJsonObject();
+        T object;
 
-    if (validate.isValid()) {
-      event.next();
-      return;
-    }
+        if (entries == null) {
 
-    Map<String, List<ErrorDetail>> details = new HashMap<>();
+            try {
+                object = clazz.getDeclaredConstructor().newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
 
-    validate.violations()
-      .forEach(constraintViolation -> {
-        if (!details.containsKey(constraintViolation.name())) {
-          details.put(constraintViolation.name(), new ArrayList<>());
+        } else {
+            object = entries.mapTo(clazz);
         }
 
-        details.get(constraintViolation.name())
-          .add(new ErrorDetail(constraintViolation.messageKey(), constraintViolation.message()));
-      });
+        ConstraintViolations validate = validator.validate(object);
 
-    ResponseHelper.json(
-      event.response(),
-      StatusCodes.BAD_REQUEST,
-      new ErrorResponseWrapper(ErrorResponse.VALIDATION_ERROR(details))
-    );
-  }
+        if (validate.isValid()) {
+            event.next();
+            return;
+        }
+
+        Map<String, List<ErrorDetail>> details = new HashMap<>();
+
+        validate.violations()
+                .forEach(constraintViolation -> {
+                    if (!details.containsKey(constraintViolation.name())) {
+                        details.put(constraintViolation.name(), new ArrayList<>());
+                    }
+
+                    details.get(constraintViolation.name())
+                            .add(new ErrorDetail(constraintViolation.messageKey(), constraintViolation.message()));
+                });
+
+        ResponseHelper.json(
+                event.response(),
+                StatusCodes.BAD_REQUEST,
+                new ErrorResponseWrapper(ErrorResponse.VALIDATION_ERROR(details))
+        );
+    }
 }

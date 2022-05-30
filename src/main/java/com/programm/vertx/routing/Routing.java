@@ -11,36 +11,36 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
 public class Routing {
-  public static Router routing(Vertx vertx) {
-    Router router = Router.router(vertx);
-    router.route().handler(BodyHandler.create());
+    public static Router routing(Vertx vertx) {
+        Router router = Router.router(vertx);
+        router.route().handler(BodyHandler.create());
 
-    router.route().handler(new JsonHandler());
+        router.route().handler(new JsonHandler());
 
-    router.route("/api/*").subRouter(users(vertx));
-    return router;
-  }
+        router.route("/api/*").subRouter(users(vertx));
+        return router;
+    }
 
-  public static Router users(Vertx vertx) {
+    public static Router users(Vertx vertx) {
 
-    UsersHandler usersHandler = new UsersHandler(new UserRepository());
+        UsersHandler usersHandler = new UsersHandler(new UserRepository());
 
-    Router router = Router.router(vertx);
+        Router router = Router.router(vertx);
 
-    router.get("/users").handler(usersHandler::getAll);
-    router.post("/users")
-      .handler(new ValidationHandler<>(UsersValidator.validator, UserInput.class))
-      .handler(usersHandler::create);
+        router.get("/users").handler(usersHandler::getAll);
+        router.post("/users")
+                .handler(new ValidationHandler<>(UsersValidator.validator, UserInput.class))
+                .handler(usersHandler::create);
 
-    router.get("/users/:id").handler(usersHandler::get);
+        router.get("/users/:id").handler(usersHandler::get);
 
-    router.put("/users/:id")
-      .handler(new ValidationHandler<>(UsersValidator.validator, UserInput.class))
-      .handler(usersHandler::put);
+        router.put("/users/:id")
+                .handler(new ValidationHandler<>(UsersValidator.validator, UserInput.class))
+                .handler(usersHandler::put);
 
-    router.delete("/users/:id").handler(usersHandler::delete);
+        router.delete("/users/:id").handler(usersHandler::delete);
 
-    return router;
-  }
+        return router;
+    }
 
 }
