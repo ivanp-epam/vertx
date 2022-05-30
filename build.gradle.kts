@@ -32,7 +32,7 @@ dependencies {
   implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
   implementation("io.vertx:vertx-core")
   implementation("io.vertx:vertx-web:$vertxVersion")
-  implementation("io.vertx:vertx-configq:$vertxVersion")
+  implementation("io.vertx:vertx-config:$vertxVersion")
   implementation("am.ik.yavi:yavi:0.11.2")
   runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.77.Final:osx-x86_64")
   testImplementation("io.vertx:vertx-junit5")
