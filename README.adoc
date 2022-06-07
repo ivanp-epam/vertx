@@ -1,0 +1,42 @@
+= Nodejs-vertx
+
+image:https://img.shields.io/badge/vert.x-4.3.0-purple.svg[link="https://vertx.io"]
+
+This application was generated using http://start.vertx.io
+
+== Building
+
+To launch your tests:
+```
+./gradlew clean test
+```
+
+To package your application:
+```
+./gradlew clean assemble
+```
+
+To run your application:
+```
+./gradlew clean run
+```
+
+Change port:
+```
+VERTX_PORT=8881 ./gradlew run
+```
+
+== Docker
+
+=== Building
+```
+docker build . -t vertx-node-programm
+```
+
+=== Running
+
+```
+docker run -p8888:8888 vertx-node-programm
+```
+
+
