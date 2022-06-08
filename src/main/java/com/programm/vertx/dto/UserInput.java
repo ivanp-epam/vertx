@@ -1,5 +1,8 @@
 package com.programm.vertx.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserInput {
     private String login;
     private String password;
