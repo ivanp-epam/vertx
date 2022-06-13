@@ -44,6 +44,10 @@ public class User {
                 .setPassword(input.getPassword());
     }
 
+    public User with(UserInput input) {
+        return User.from(input).setId(id);
+    }
+
     public String getId() {
         return id;
     }

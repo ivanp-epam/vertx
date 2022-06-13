@@ -1,4 +1,4 @@
-package com.programm.vertx.response;
+package com.programm.vertx.response.error;
 
 public class ErrorDetail {
     private final String key;

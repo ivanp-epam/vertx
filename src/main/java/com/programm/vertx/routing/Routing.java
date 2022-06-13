@@ -1,58 +1,44 @@
 package com.programm.vertx.routing;
 
 import com.programm.vertx.dto.UserInput;
+import com.programm.vertx.exceptions.HttpException;
 import com.programm.vertx.handler.JsonHandler;
 import com.programm.vertx.handler.UsersHandler;
 import com.programm.vertx.handler.ValidationHandler;
+import com.programm.vertx.handler.errorHandlers.RouteHandlerManager;
 import com.programm.vertx.repository.inmemory.UserRepository;
 import com.programm.vertx.validators.UsersValidator;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.ext.web.handler.impl.StaticHandlerImpl;
 
-import java.io.File;
-import java.net.URL;
+import static io.vertx.ext.web.handler.FileSystemAccess.RELATIVE;
 
 public class Routing {
     public static Router routing(Vertx vertx) {
         Router router = Router.router(vertx);
+
         swagger(router);
 
         router.route().handler(BodyHandler.create());
-
         router.route().handler(new JsonHandler());
 
         router.route("/api/*").subRouter(users(vertx));
+
+        errorHandler(router);
         return router;
     }
-    public static void swagger(Router router) {
-//        router.get().handler(
-//                StaticHandler
-//                        .create()
-//                        .setCachingEnabled(false)
-//                        .setWebRoot("swagger"));
 
-        router.get("/swagger").respond(event -> {
-            String s = Routing.class.getClassLoader()
-                    .getResource("swagger/index.html").getFile();
-            System.out.println(s);
-            return event.response().sendFile(s);
-            }
-        );
-        router.get("/swagger/:filename").respond(event -> {
-            String filename = event.pathParam("filename");
-            ClassLoader classLoader = Routing.class.getClassLoader();
-            URL resource = classLoader.getResource("swagger/" + filename);
-            if(resource == null){
-                return event.response().setStatusCode(404).end("Not found");
-            }
-            String filepath = resource.getFile();
-            if(!new File(filepath).exists()){
-                return event.response().setStatusCode(404).end("Not found");
-            }
-            return event.response().sendFile(filepath);
-        });
+    public static void swagger(Router router) {
+        StaticHandlerImpl staticHandler = new StaticHandlerImpl(RELATIVE, "swagger");
+        router.get("/swagger/*").handler(staticHandler);
+    }
+
+    public static void errorHandler(Router router) {
+        router.route().failureHandler(new RouteHandlerManager());
     }
 
     public static Router users(Vertx vertx) {
