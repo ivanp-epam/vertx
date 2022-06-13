@@ -1,6 +1,6 @@
 package com.programm.vertx.handler;
 
-import com.programm.vertx.dto.UserDto;
+import com.programm.vertx.entities.User;
 import com.programm.vertx.dto.UserInput;
 import com.programm.vertx.http.ResponseHelper;
 import com.programm.vertx.http.StatusCodes;
@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class UsersHandler {
-    private final IRepository<UserDto> repository;
+    private final IRepository<User> repository;
 
-    public UsersHandler(IRepository<UserDto> repository) {
+    public UsersHandler(IRepository<User> repository) {
         this.repository = repository;
     }
 
@@ -41,7 +41,7 @@ public class UsersHandler {
             }
         }
 
-        Map<String, UserDto> result = repository.findAll();
+        Map<String, User> result = repository.findAll();
 
         if (startsFrom != null) {
             String startsFromLowerCase = startsFrom.toLowerCase();
@@ -64,13 +64,13 @@ public class UsersHandler {
     public void create(RoutingContext ctx) {
         RequestBody body = ctx.body();
         UserInput userInput = body.asJsonObject().mapTo(UserInput.class);
-        UserDto dto = repository.add(UserDto.from(userInput));
+        User dto = repository.add(User.from(userInput));
 
         ResponseHelper.json(ctx.response(), UserResponse.from(dto));
     }
 
     public void get(RoutingContext ctx) {
-        UserDto dto = repository.find(ctx.pathParam("id"));
+        User dto = repository.find(ctx.pathParam("id"));
         if (dto == null) {
             ResponseHelper.json(ctx.response(), StatusCodes.NOT_FOUND, new ErrorResponseWrapper(ErrorResponse.NOT_FOUND()));
             return;
@@ -80,13 +80,13 @@ public class UsersHandler {
 
     public void put(RoutingContext ctx) {
         String uuid = ctx.pathParam("id");
-        UserDto dto = repository.find(uuid);
+        User dto = repository.find(uuid);
 
         if (dto == null) {
             ResponseHelper.json(ctx.response(), StatusCodes.NOT_FOUND, new ErrorResponseWrapper(ErrorResponse.NOT_FOUND()));
             return;
         }
-        UserDto from = UserDto.from(ctx.body().asJsonObject().mapTo(UserInput.class));
+        User from = User.from(ctx.body().asJsonObject().mapTo(UserInput.class));
         from.setId(uuid);
         repository.update(from);
 
@@ -94,7 +94,7 @@ public class UsersHandler {
     }
 
     public void delete(RoutingContext ctx) {
-        UserDto dto = repository.find(ctx.pathParam("id"));
+        User dto = repository.find(ctx.pathParam("id"));
         if (dto == null) {
             ResponseHelper.json(ctx.response(), StatusCodes.NOT_FOUND, new ErrorResponseWrapper(ErrorResponse.NOT_FOUND()));
             return;

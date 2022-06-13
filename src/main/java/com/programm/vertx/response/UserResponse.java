@@ -1,6 +1,6 @@
 package com.programm.vertx.response;
 
-import com.programm.vertx.dto.UserDto;
+import com.programm.vertx.entities.User;
 
 public class UserResponse {
     private String id;
@@ -8,7 +8,7 @@ public class UserResponse {
     private String password;
     private int age;
 
-    public static UserResponse from(UserDto dto) {
+    public static UserResponse from(User dto) {
         return new UserResponse()
                 .setAge(dto.getAge())
                 .setId(dto.getId())
