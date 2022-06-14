@@ -1,32 +1,14 @@
 package com.programm.vertx.handler;
 
-import am.ik.yavi.builder.ValidatorBuilder;
-import am.ik.yavi.core.Validator;
-import com.programm.vertx.handler.stub.StubClass;
-import com.programm.vertx.handler.stub.StubClass2;
-import com.programm.vertx.http.StatusCodes;
-import com.programm.vertx.response.error.ErrorDetail;
-import com.programm.vertx.response.error.ErrorObject;
-import com.programm.vertx.response.error.ErrorResponse;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RequestBody;
-import io.vertx.ext.web.RoutingContext;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import com.programm.vertx.helper.JsonHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class ValidationHandlerTest {

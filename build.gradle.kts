@@ -15,8 +15,9 @@ repositories {
   mavenCentral()
 }
 
-val vertxVersion = "4.3.0"
+val vertxVersion = "4.3.1"
 val junitJupiterVersion = "5.8.2"
+val mutinyVertXVersion = "2.22.0"
 
 val mainVerticleName = "com.programm.vertx.MainVerticle"
 val launcherClassName = "io.vertx.core.Launcher"
@@ -29,9 +30,9 @@ application {
 }
 
 dependencies {
-  liquibaseRuntime("org.liquibase:liquibase-core:4.10.0")
+  liquibaseRuntime("org.liquibase:liquibase-core:4.11.0")
   liquibaseRuntime("org.liquibase:liquibase-groovy-dsl:3.0.2")
-  liquibaseRuntime("org.postgresql:postgresql:42.3.4")
+  liquibaseRuntime("org.postgresql:postgresql:42.3.6")
 
   implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
   implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
@@ -39,16 +40,18 @@ dependencies {
   implementation("io.vertx:vertx-web:$vertxVersion")
   implementation("io.vertx:vertx-config:$vertxVersion")
   implementation("io.vertx:vertx-pg-client:$vertxVersion")
+  implementation("io.smallrye.reactive:smallrye-mutiny-vertx-core:$mutinyVertXVersion")
+  implementation("io.smallrye.reactive:smallrye-mutiny-vertx-web:$mutinyVertXVersion")
   implementation("org.hibernate.reactive:hibernate-reactive-core:1.1.6.Final")
   implementation("org.apache.logging.log4j:log4j-core:2.17.2")
-  implementation("am.ik.yavi:yavi:0.11.2")
+  implementation("am.ik.yavi:yavi:0.11.3")
 
   runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.77.Final:osx-x86_64")
 
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
-  testImplementation("org.mockito:mockito-core:4.5.1")
-  testImplementation("org.mockito:mockito-junit-jupiter:4.6.0")
+  testImplementation("org.mockito:mockito-core:4.6.1")
+  testImplementation("org.mockito:mockito-junit-jupiter:4.6.1")
 }
 
 java {

@@ -1,8 +1,8 @@
-package com.programm.vertx.dto;
+package com.programm.vertx.request;
 
 import com.programm.vertx.helper.IntegerHelper;
 
-public class UserFilter {
+public class UsersFilterRequest {
 
     private final int defaultOffset = 0;
     private final int defaultLimit = 10;
@@ -12,7 +12,7 @@ public class UserFilter {
     private final int limit;
     private final int offset;
 
-    public UserFilter(String startFrom, String limit, String offset) {
+    public UsersFilterRequest(String startFrom, String limit, String offset) {
         this.startFrom = startFrom;
         this.limit = IntegerHelper.tryParseInt(limit, defaultLimit);
         this.offset = IntegerHelper.tryParseInt(offset, defaultOffset);

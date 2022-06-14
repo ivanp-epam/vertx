@@ -1,7 +1,7 @@
 package com.programm.vertx.handler;
 
-import com.programm.vertx.dto.UserFilter;
-import com.programm.vertx.dto.UserInput;
+import com.programm.vertx.request.UsersFilterRequest;
+import com.programm.vertx.request.UserRequest;
 import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.HttpException;
 import com.programm.vertx.repository.inmemory.UserRepository;
@@ -20,18 +20,18 @@ public class UsersHandler {
     public void getAll(RoutingContext ctx) {
         HttpServerRequest request = ctx.request();
 
-        UserFilter userFilter = new UserFilter(
+        UsersFilterRequest usersFilterRequest = new UsersFilterRequest(
                 request.getParam("startsFrom"),
                 request.getParam("limit"),
                 request.getParam("offset")
         );
 
-        ctx.json(repository.findByPrefix(userFilter));
+        ctx.json(repository.findByPrefix(usersFilterRequest));
     }
 
     public void create(RoutingContext ctx) throws HttpException {
-        UserInput userInput = ctx.body().asPojo(UserInput.class);
-        User dto = repository.add(User.from(userInput));
+        UserRequest userRequest = ctx.body().asPojo(UserRequest.class);
+        User dto = repository.add(User.from(userRequest));
 
         ctx.json(UserResponse.from(dto));
     }
@@ -45,8 +45,8 @@ public class UsersHandler {
         String uuid = ctx.pathParam("id");
 
         User user = repository.get(uuid);
-        UserInput userInput = ctx.body().asPojo(UserInput.class);
-        User updatedUser = user.with(userInput);
+        UserRequest userRequest = ctx.body().asPojo(UserRequest.class);
+        User updatedUser = user.with(userRequest);
 
         repository.update(updatedUser);
 

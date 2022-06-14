@@ -1,7 +1,6 @@
 package com.programm.vertx.routing;
 
-import com.programm.vertx.dto.UserInput;
-import com.programm.vertx.exceptions.HttpException;
+import com.programm.vertx.request.UserRequest;
 import com.programm.vertx.handler.JsonHandler;
 import com.programm.vertx.handler.UsersHandler;
 import com.programm.vertx.handler.ValidationHandler;
@@ -9,8 +8,6 @@ import com.programm.vertx.handler.errorHandlers.RouteHandlerManager;
 import com.programm.vertx.repository.inmemory.UserRepository;
 import com.programm.vertx.validators.UsersValidator;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.impl.StaticHandlerImpl;
@@ -49,13 +46,13 @@ public class Routing {
 
         router.get("/users").handler(usersHandler::getAll);
         router.post("/users")
-                .handler(new ValidationHandler<>(UsersValidator.validator, UserInput.class))
+                .handler(new ValidationHandler<>(UsersValidator.validator, UserRequest.class))
                 .handler(usersHandler::create);
 
         router.get("/users/:id").handler(usersHandler::get);
 
         router.put("/users/:id")
-                .handler(new ValidationHandler<>(UsersValidator.validator, UserInput.class))
+                .handler(new ValidationHandler<>(UsersValidator.validator, UserRequest.class))
                 .handler(usersHandler::put);
 
         router.delete("/users/:id").handler(usersHandler::delete);

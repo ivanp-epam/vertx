@@ -1,9 +1,9 @@
-package com.programm.vertx.dto;
+package com.programm.vertx.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserInput {
+public class UserRequest {
     private String login;
     private String password;
     private int age;
@@ -13,7 +13,7 @@ public class UserInput {
         return login;
     }
 
-    public UserInput setLogin(String login) {
+    public UserRequest setLogin(String login) {
         this.login = login;
         return this;
     }
@@ -22,7 +22,7 @@ public class UserInput {
         return password;
     }
 
-    public UserInput setPassword(String password) {
+    public UserRequest setPassword(String password) {
         this.password = password;
         return this;
     }
@@ -31,7 +31,7 @@ public class UserInput {
         return age;
     }
 
-    public UserInput setAge(int age) {
+    public UserRequest setAge(int age) {
         this.age = age;
         return this;
     }
@@ -40,7 +40,7 @@ public class UserInput {
         return isDeleted;
     }
 
-    public UserInput setDeleted(boolean deleted) {
+    public UserRequest setDeleted(boolean deleted) {
         isDeleted = deleted;
         return this;
     }

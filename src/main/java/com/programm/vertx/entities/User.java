@@ -1,6 +1,6 @@
 package com.programm.vertx.entities;
 
-import com.programm.vertx.dto.UserInput;
+import com.programm.vertx.request.UserRequest;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -36,7 +36,7 @@ public class User {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
-    public static User from(UserInput input) {
+    public static User from(UserRequest input) {
         return new User()
                 .setAge(input.getAge())
                 .setId(UUID.randomUUID().toString())
@@ -44,7 +44,7 @@ public class User {
                 .setPassword(input.getPassword());
     }
 
-    public User with(UserInput input) {
+    public User with(UserRequest input) {
         return User.from(input).setId(id);
     }
 

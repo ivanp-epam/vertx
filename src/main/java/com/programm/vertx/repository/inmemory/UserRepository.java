@@ -1,6 +1,6 @@
 package com.programm.vertx.repository.inmemory;
 
-import com.programm.vertx.dto.UserFilter;
+import com.programm.vertx.request.UsersFilterRequest;
 import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.EntityNotFoundException;
 import com.programm.vertx.repository.IUserRepository;
@@ -72,7 +72,7 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public ResponseWrapper<Map<String, UserResponse>> findByPrefix(UserFilter filter) {
+    public ResponseWrapper<Map<String, UserResponse>> findByPrefix(UsersFilterRequest filter) {
         Map<String, User> all = this.findAll();
 
         String startsFrom = filter.getStartFrom();
