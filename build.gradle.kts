@@ -43,7 +43,7 @@ dependencies {
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-core:$mutinyVertXVersion")
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-web:$mutinyVertXVersion")
   implementation("org.hibernate.reactive:hibernate-reactive-core:1.1.6.Final")
-  implementation("org.apache.logging.log4j:log4j-core:2.17.2")
+  implementation("ch.qos.logback:logback-classic:1.2.11")
   implementation("am.ik.yavi:yavi:0.11.3")
 
   runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.77.Final:osx-x86_64")

@@ -1,9 +1,11 @@
 package com.programm.vertx.handler.errorHandlers;
 
 import io.vertx.core.Handler;
-import io.vertx.ext.web.RoutingContext;
+import io.vertx.mutiny.ext.web.RoutingContext;
 
-public interface RouteHandlerSpecification extends Handler<RoutingContext> {
+import java.util.function.Consumer;
+
+public interface RouteHandlerSpecification extends Consumer<RoutingContext> {
 
     public boolean isSatisfy(RoutingContext event);
 }

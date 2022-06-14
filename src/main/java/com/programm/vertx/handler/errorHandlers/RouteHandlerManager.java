@@ -1,17 +1,16 @@
 package com.programm.vertx.handler.errorHandlers;
 
-import io.vertx.core.Handler;
-import io.vertx.ext.web.RoutingContext;
+import io.vertx.mutiny.ext.web.RoutingContext;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class RouteHandlerManager implements Handler<RoutingContext> {
+public class RouteHandlerManager implements Consumer<RoutingContext> {
 
     private final List<RouteHandlerSpecification> handlers = List.of(new HttpErrorHandler());
 
     private final RouteHandlerSpecification defaultHandler = new DefaultHandler();
 
-    @Override
     public void handle(RoutingContext event) {
         for (RouteHandlerSpecification handler : handlers) {
 
@@ -19,11 +18,16 @@ public class RouteHandlerManager implements Handler<RoutingContext> {
                 continue;
             }
 
-            handler.handle(event);
+            handler.accept(event);
             return;
         }
 
         // fire default error handler if none handler found previously
-        defaultHandler.handle(event);
+        defaultHandler.accept(event);
+    }
+
+    @Override
+    public void accept(RoutingContext routingContext) {
+        handle(routingContext);
     }
 }

@@ -4,10 +4,11 @@ import am.ik.yavi.core.ConstraintViolations;
 import am.ik.yavi.core.Validator;
 import com.programm.vertx.exceptions.ValidationException;
 import com.programm.vertx.helper.JsonHelper;
-import io.vertx.core.Handler;
-import io.vertx.ext.web.RoutingContext;
+import io.vertx.mutiny.ext.web.RoutingContext;
 
-public class ValidationHandler<T> implements Handler<RoutingContext> {
+import java.util.function.Consumer;
+
+public class ValidationHandler<T> implements Consumer<RoutingContext> {
 
     private final Validator<T> validator;
     private final Class<T> clazz;
@@ -17,9 +18,8 @@ public class ValidationHandler<T> implements Handler<RoutingContext> {
         this.clazz = clazz;
     }
 
-    @Override
     public void handle(RoutingContext event) {
-        String entries = event.body().asString();
+        String entries = event.getBodyAsString();
 
         T object = JsonHelper.fromJsonObject(entries, clazz);
         ConstraintViolations validate = validator.validate(object);
@@ -30,5 +30,10 @@ public class ValidationHandler<T> implements Handler<RoutingContext> {
         }
 
         throw new ValidationException(validate.violations());
+    }
+
+    @Override
+    public void accept(RoutingContext routingContext) {
+        handle(routingContext);
     }
 }

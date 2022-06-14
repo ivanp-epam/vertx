@@ -1,16 +1,17 @@
 package com.programm.vertx.routing;
 
-import com.programm.vertx.request.UserRequest;
 import com.programm.vertx.handler.JsonHandler;
 import com.programm.vertx.handler.UsersHandler;
 import com.programm.vertx.handler.ValidationHandler;
 import com.programm.vertx.handler.errorHandlers.RouteHandlerManager;
 import com.programm.vertx.repository.inmemory.UserRepository;
+import com.programm.vertx.request.UserRequest;
 import com.programm.vertx.validators.UsersValidator;
-import io.vertx.core.Vertx;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.impl.StaticHandlerImpl;
+import io.vertx.mutiny.core.Vertx;
+import io.vertx.mutiny.ext.web.Router;
+import io.vertx.mutiny.ext.web.handler.BodyHandler;
+import io.vertx.mutiny.ext.web.handler.StaticHandler;
 
 import static io.vertx.ext.web.handler.FileSystemAccess.RELATIVE;
 
@@ -19,7 +20,6 @@ public class Routing {
         Router router = Router.router(vertx);
 
         swagger(router);
-
         router.route().handler(BodyHandler.create());
         router.route().handler(new JsonHandler());
 
@@ -30,7 +30,7 @@ public class Routing {
     }
 
     public static void swagger(Router router) {
-        StaticHandlerImpl staticHandler = new StaticHandlerImpl(RELATIVE, "swagger");
+        StaticHandler staticHandler = new StaticHandler(new StaticHandlerImpl(RELATIVE, "swagger"));
         router.get("/swagger/*").handler(staticHandler);
     }
 
