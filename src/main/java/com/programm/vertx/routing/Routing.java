@@ -1,5 +1,6 @@
 package com.programm.vertx.routing;
 
+import com.programm.vertx.bootstrap.DataBaseBootstrap;
 import com.programm.vertx.handler.JsonHandler;
 import com.programm.vertx.handler.UsersHandler;
 import com.programm.vertx.handler.ValidationHandler;
@@ -16,7 +17,14 @@ import io.vertx.mutiny.ext.web.handler.StaticHandler;
 import static io.vertx.ext.web.handler.FileSystemAccess.RELATIVE;
 
 public class Routing {
-    public static Router routing(Vertx vertx) {
+
+    private final DataBaseBootstrap bootstrap;
+
+    public Routing(DataBaseBootstrap bootstrap) {
+        this.bootstrap = bootstrap;
+    }
+
+    public Router routing(Vertx vertx) {
         Router router = Router.router(vertx);
 
         swagger(router);
@@ -29,18 +37,18 @@ public class Routing {
         return router;
     }
 
-    public static void swagger(Router router) {
+    public void swagger(Router router) {
         StaticHandler staticHandler = new StaticHandler(new StaticHandlerImpl(RELATIVE, "swagger"));
         router.get("/swagger/*").handler(staticHandler);
     }
 
-    public static void errorHandler(Router router) {
+    public void errorHandler(Router router) {
         router.route().failureHandler(new RouteHandlerManager());
     }
 
-    public static Router users(Vertx vertx) {
+    public Router users(Vertx vertx) {
 
-        UsersHandler usersHandler = new UsersHandler(new UserRepository());
+        UsersHandler usersHandler = new UsersHandler(bootstrap.getRepository());
 
         Router router = Router.router(vertx);
 

@@ -1,11 +1,13 @@
 package com.programm.vertx.entities;
 
 import com.programm.vertx.request.UserRequest;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.UUID;
 
 @Entity
@@ -15,14 +17,8 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(name = "id")
     private String id;
-
 
     @Column(name = "login")
     private String login;
@@ -35,6 +31,10 @@ public class User {
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
+
+    public User() {
+
+    }
 
     public static User from(UserRequest input) {
         return new User()

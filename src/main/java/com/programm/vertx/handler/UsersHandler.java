@@ -2,6 +2,7 @@ package com.programm.vertx.handler;
 
 import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.HttpException;
+import com.programm.vertx.repository.IUserRepository;
 import com.programm.vertx.repository.inmemory.UserRepository;
 import com.programm.vertx.request.UserRequest;
 import com.programm.vertx.request.UsersFilterRequest;
@@ -12,9 +13,9 @@ import io.vertx.mutiny.core.http.HttpServerRequest;
 import io.vertx.mutiny.ext.web.RoutingContext;
 
 public class UsersHandler {
-    private final UserRepository repository;
+    private final IUserRepository repository;
 
-    public UsersHandler(UserRepository repository) {
+    public UsersHandler(IUserRepository repository) {
         this.repository = repository;
     }
 

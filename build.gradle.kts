@@ -42,6 +42,7 @@ dependencies {
   implementation("io.vertx:vertx-pg-client:$vertxVersion")
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-core:$mutinyVertXVersion")
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-web:$mutinyVertXVersion")
+  implementation("io.smallrye.reactive:smallrye-mutiny-vertx-pg-client:$mutinyVertXVersion")
   implementation("org.hibernate.reactive:hibernate-reactive-core:1.1.6.Final")
   implementation("ch.qos.logback:logback-classic:1.2.11")
   implementation("am.ik.yavi:yavi:0.11.3")
