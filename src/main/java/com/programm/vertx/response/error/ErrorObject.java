@@ -15,14 +15,14 @@ public class ErrorObject {
     }
 
     public ErrorObject(int code, String message) {
-        this(code,message, Map.of());
+        this(code, message, Map.of());
     }
 
     public ErrorObject(ErrorCodes error) {
-        this(error.getCode(),error.getMessage(), Map.of());
+        this(error.getCode(), error.getMessage(), Map.of());
     }
 
     public ErrorObject(ErrorCodes error, Map<String, List<ErrorDetail>> details) {
-        this(error.getCode(),error.getMessage(), details);
+        this(error.getCode(), error.getMessage(), details);
     }
 }

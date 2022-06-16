@@ -11,6 +11,7 @@ public class DefaultHandler implements RouteHandlerSpecification {
 
     /**
      * Default Handler AlwaysTrue
+     *
      * @param throwable
      * @return
      */

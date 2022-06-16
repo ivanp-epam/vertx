@@ -1,6 +1,7 @@
 package com.programm.vertx.bootstrap;
 
 import com.programm.vertx.config.ApplicationConfig;
+import com.programm.vertx.repository.IUserRepository;
 import com.programm.vertx.repository.hibernate.UserRepository;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.Vertx;
@@ -38,7 +39,7 @@ public class DataBaseBootstrap {
         return sessionFactory;
     }
 
-    public UserRepository getRepository() {
+    public IUserRepository getRepository() {
         return new UserRepository(getSessionFactory());
     }
 

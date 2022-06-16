@@ -1,19 +1,20 @@
 package com.programm.vertx.repository;
 
 import com.programm.vertx.exceptions.EntityNotFoundException;
+import io.smallrye.mutiny.Uni;
 
 import java.util.Map;
 
 public interface IRepository<T> {
-    Map<String, T> findAll();
+    Uni<Map<String, T>> findAll();
 
-    T find(String id);
+    Uni<T> find(String id);
 
-    T get(String id) throws EntityNotFoundException;
+    Uni<T> get(String id) throws EntityNotFoundException;
 
-    T add(T entity);
+    Uni<T> add(T entity);
 
-    boolean delete(T entity);
+    Uni<Void> delete(T entity);
 
-    T update(T entity);
+    Uni<T> update(T entity);
 }

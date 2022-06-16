@@ -27,10 +27,10 @@ public class ValidationException extends HttpException {
     private Map<String, List<ErrorDetail>> details() {
         Map<String, List<ErrorDetail>> details = new HashMap<>();
 
-        for (ConstraintViolation violation: violations) {
+        for (ConstraintViolation violation : violations) {
             String key = violation.name();
 
-            if(!details.containsKey(key)){
+            if (!details.containsKey(key)) {
                 details.put(key, new ArrayList<>());
             }
 

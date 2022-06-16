@@ -1,6 +1,5 @@
 package com.programm.vertx.handler.errorHandlers;
 
-import io.vertx.core.Handler;
 import io.vertx.mutiny.ext.web.RoutingContext;
 
 import java.util.function.Consumer;

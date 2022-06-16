@@ -1,12 +1,13 @@
 package com.programm.vertx.repository.inmemory;
 
-import com.programm.vertx.request.UsersFilterRequest;
 import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.EntityNotFoundException;
 import com.programm.vertx.repository.IUserRepository;
+import com.programm.vertx.request.UsersFilterRequest;
 import com.programm.vertx.response.Pagination;
 import com.programm.vertx.response.ResponseWrapper;
 import com.programm.vertx.response.UserResponse;
+import io.smallrye.mutiny.Uni;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,54 +18,52 @@ public class UserRepository implements IUserRepository {
     private Map<String, User> users = new HashMap<>();
 
     @Override
-    public Map<String, User> findAll() {
-        return users.entrySet()
+    public Uni<Map<String, User>> findAll() {
+        Map<String, User> collect = users.entrySet()
                 .stream()
                 .filter(entry -> !entry.getValue().isDeleted())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return Uni.createFrom().item(collect);
     }
 
     @Override
-    public User find(String id) {
+    public Uni<User> find(String id) {
         if (!users.containsKey(id)) {
-            return null;
+            return Uni.createFrom().nullItem();
         }
 
         User user = users.get(id);
 
         if (user.isDeleted()) {
-            return null;
+            return Uni.createFrom().nullItem();
         }
 
-        return user;
+        return Uni.createFrom().item(user);
     }
 
     @Override
-    public User get(String id) throws EntityNotFoundException {
-        User user = this.find(id);
-        if (user == null) {
-            throw new EntityNotFoundException();
-        }
-        return user;
+    public Uni<User> get(String id) throws EntityNotFoundException {
+        return this.find(id).onItem().ifNull().failWith(EntityNotFoundException::new);
     }
 
     @Override
-    public User add(User entity) {
-        users.put(entity.getId(), entity);
-        return entity;
+    public Uni<User> add(User entity) {
+        users.put(entity.getStringId(), entity);
+        return Uni.createFrom().item(entity);
     }
 
     @Override
-    public boolean delete(User entity) {
+    public Uni<Void> delete(User entity) {
         entity.setDeleted(true);
-        users.put(entity.getId(), entity);
+        users.put(entity.getStringId(), entity);
 
-        return true;
+        return Uni.createFrom().nullItem();
     }
 
     @Override
-    public User update(User entity) {
-        return users.replace(entity.getId(), entity);
+    public Uni<User> update(User entity) {
+        User replace = users.replace(entity.getStringId(), entity);
+        return Uni.createFrom().item(replace);
     }
 
     public void clear() {
@@ -72,8 +71,8 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public ResponseWrapper<Map<String, UserResponse>> findByPrefix(UsersFilterRequest filter) {
-        Map<String, User> all = this.findAll();
+    public Uni<ResponseWrapper<Map<String, UserResponse>>> findByPrefix(UsersFilterRequest filter) {
+        Uni<Map<String, User>> all = this.findAll();
 
         String startsFrom = filter.getStartFrom();
         int offset = filter.getOffset();
@@ -81,19 +80,20 @@ public class UserRepository implements IUserRepository {
 
         if (startsFrom != null) {
             String startsFromLowerCase = startsFrom.toLowerCase();
-            all = all.entrySet().stream()
+            all = all.map(el -> el.entrySet().stream()
                     .filter(entry -> entry.getValue().getLogin().toLowerCase().startsWith(startsFromLowerCase))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
         }
 
-        long total = all.size();
+        Uni<Long> total = all.map(stringUserMap -> (long) stringUserMap.size());
 
-        Map<String, UserResponse> collect = all.entrySet().stream()
+        Uni<Map<String, UserResponse>> collect = all.map(el -> el.entrySet().stream()
                 .skip(offset).limit(limit)
                 .map(entry -> Map.entry(entry.getKey(), UserResponse.from(entry.getValue())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-        return new ResponseWrapper<>(collect,
-                new Pagination(total, offset, limit));
+        return Uni.combine().all().unis(collect, total).combinedWith((responseMap, totalNum) -> new ResponseWrapper<>(responseMap,
+                new Pagination(totalNum, offset, limit)));
     }
 }

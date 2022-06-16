@@ -10,15 +10,16 @@ public class ErrorResponse {
         this.error = error;
     }
 
-    public ErrorObject getError() {
-        return error;
-    }
-
     public static ErrorResponse create(ErrorCodes error, Map<String, List<ErrorDetail>> details) {
         ErrorObject errorObject = new ErrorObject(error.getCode(), error.getMessage(), details);
         return new ErrorResponse(errorObject);
     }
+
     public static ErrorResponse create(ErrorCodes error) {
         return ErrorResponse.create(error, Map.of());
+    }
+
+    public ErrorObject getError() {
+        return error;
     }
 }

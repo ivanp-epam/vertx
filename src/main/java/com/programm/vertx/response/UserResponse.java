@@ -11,7 +11,7 @@ public class UserResponse {
     public static UserResponse from(User dto) {
         return new UserResponse()
                 .setAge(dto.getAge())
-                .setId(dto.getId())
+                .setId(dto.getStringId())
                 .setLogin(dto.getLogin())
                 .setPassword(dto.getPassword());
     }

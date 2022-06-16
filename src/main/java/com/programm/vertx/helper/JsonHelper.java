@@ -1,7 +1,6 @@
 package com.programm.vertx.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 

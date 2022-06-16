@@ -5,7 +5,6 @@ import com.programm.vertx.handler.JsonHandler;
 import com.programm.vertx.handler.UsersHandler;
 import com.programm.vertx.handler.ValidationHandler;
 import com.programm.vertx.handler.errorHandlers.RouteHandlerManager;
-import com.programm.vertx.repository.inmemory.UserRepository;
 import com.programm.vertx.request.UserRequest;
 import com.programm.vertx.validators.UsersValidator;
 import io.vertx.ext.web.handler.impl.StaticHandlerImpl;
@@ -49,6 +48,7 @@ public class Routing {
     public Router users(Vertx vertx) {
 
         UsersHandler usersHandler = new UsersHandler(bootstrap.getRepository());
+//        UsersHandler usersHandler = new UsersHandler(new UserRepository());
 
         Router router = Router.router(vertx);
 

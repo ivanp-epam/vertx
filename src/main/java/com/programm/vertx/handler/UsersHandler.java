@@ -3,14 +3,17 @@ package com.programm.vertx.handler;
 import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.HttpException;
 import com.programm.vertx.repository.IUserRepository;
-import com.programm.vertx.repository.inmemory.UserRepository;
 import com.programm.vertx.request.UserRequest;
 import com.programm.vertx.request.UsersFilterRequest;
+import com.programm.vertx.response.ResponseWrapper;
 import com.programm.vertx.response.UserResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.Json;
 import io.vertx.mutiny.core.http.HttpServerRequest;
 import io.vertx.mutiny.ext.web.RoutingContext;
+
+import java.util.Map;
 
 public class UsersHandler {
     private final IUserRepository repository;
@@ -28,39 +31,53 @@ public class UsersHandler {
                 request.getParam("offset")
         );
 
-        ctx.jsonAndForget(repository.findByPrefix(usersFilterRequest));
+        Uni<ResponseWrapper<Map<String, UserResponse>>> byPrefix = repository.findByPrefix(usersFilterRequest);
+
+        byPrefix
+                .onFailure().invoke(ctx::fail)
+                .subscribe().with(ctx::jsonAndForget);
     }
 
     public void create(RoutingContext ctx) throws HttpException {
         UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
-        User dto = repository.add(User.from(userRequest));
+        Uni<User> dto = repository.add(User.from(userRequest));
 
-        ctx.jsonAndForget(UserResponse.from(dto));
+        dto.map(UserResponse::from).subscribe().with(ctx::jsonAndForget);
     }
 
     public void get(RoutingContext ctx) throws HttpException {
-        User dto = repository.get(ctx.pathParam("id"));
-        ctx.jsonAndForget(UserResponse.from(dto));
+        Uni<User> dto = repository.get(ctx.pathParam("id"));
+
+        dto.map(UserResponse::from)
+                .onFailure().invoke(ctx::fail)
+                .subscribe().with(ctx::jsonAndForget);
     }
 
     public void put(RoutingContext ctx) throws HttpException {
         String uuid = ctx.pathParam("id");
 
-        User user = repository.get(uuid);
-        UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
-        User updatedUser = user.with(userRequest);
+        Uni<User> user = repository.get(uuid);
 
-        repository.update(updatedUser);
+        Uni<User> invoke = user
+                .map(userEl -> {
+                    UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
+                    return userEl.with(userRequest);
+                })
+                .call(repository::update);
 
-        ctx.jsonAndForget(UserResponse.from(updatedUser));
+        invoke
+                .onFailure().invoke(ctx::fail)
+                .map(UserResponse::from).subscribe().with(ctx::jsonAndForget);
     }
 
     public void delete(RoutingContext ctx) throws HttpException {
         String id = ctx.pathParam("id");
 
-        User dto = repository.get(id);
-        repository.delete(dto);
-
-        ctx.response().setStatusCode(HttpResponseStatus.NO_CONTENT.code()).endAndForget();
+        Uni<User> dto = repository.get(id);
+        dto.onItem().call(repository::delete)
+                .onFailure().invoke(ctx::fail)
+                .subscribe().with((el) -> {
+                    ctx.response().setStatusCode(HttpResponseStatus.NO_CONTENT.code()).endAndForget();
+                });
     }
 }
