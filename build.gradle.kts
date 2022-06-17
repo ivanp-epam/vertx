@@ -68,7 +68,7 @@ liquibase {
 
     this.arguments = mapOf(
             "logLevel" to "info",
-            "changeLogFile" to "src/main/resources/db/changelog.sql",
+            "changeLogFile" to "src/main/resources/db/changelog.xml",
             "url" to dbUrl,
             "username" to dbUser,
             "password" to dbPassword,

@@ -92,6 +92,7 @@ public class UserRepository implements IUserRepository {
             query = query.where(criteriaBuilder.like(a.get("login"), filter.getStartFrom() + "%"));
             queryCount = queryCount.where(criteriaBuilder.like(a.get("login"), filter.getStartFrom() + "%"));
         }
+        queryCount.
 
         CriteriaQuery<User> finalQuery = query;
 
