@@ -42,7 +42,9 @@ public class UsersHandler {
         UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
         Uni<User> dto = repository.add(User.from(userRequest));
 
-        dto.map(UserResponse::from).subscribe().with(ctx::jsonAndForget);
+        dto.map(UserResponse::from)
+                .onFailure().invoke(ctx::fail)
+                .subscribe().with(ctx::jsonAndForget);
     }
 
     public void get(RoutingContext ctx) throws HttpException {
