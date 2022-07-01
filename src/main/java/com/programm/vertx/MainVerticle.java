@@ -1,30 +1,34 @@
 package com.programm.vertx;
 
+import com.programm.vertx.bootstrap.DataBaseBootstrap;
+import com.programm.vertx.config.ApplicationConfig;
 import com.programm.vertx.routing.Routing;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.vertx.core.AbstractVerticle;
 import io.vertx.config.ConfigRetriever;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.Vertx;
+import io.vertx.mutiny.core.http.HttpServer;
 
 public class MainVerticle extends AbstractVerticle {
 
-
-    @Override
-    public void start(Promise<Void> startPromise) throws Exception {
-        ConfigRetriever retriever = ConfigRetriever.create(vertx);
-        JsonObject config = retriever.getConfig().result();
+    public Uni<Void> asyncStart() {
+        ApplicationConfig appConfig = new ApplicationConfig(ConfigRetriever.create(Vertx.vertx()));
+        DataBaseBootstrap dataBaseBootstrap = new DataBaseBootstrap(appConfig, vertx);
+        Routing routing = new Routing(dataBaseBootstrap);
 
         // Create the HTTP server
-        vertx.createHttpServer()
+        Uni<HttpServer> startHttpServer = vertx.createHttpServer()
                 // Handle every request using the router
-                .requestHandler(Routing.routing(vertx))
+                .requestHandler(routing.routing(vertx))
                 // Start listening
-                .listen(config.getInteger("VERTX_PORT", 8888))
+                .listen(appConfig.getHttp().getPort())
                 // Print the port
-                .onSuccess(server ->
+                .onItem().invoke((httpServer) ->
                         System.out.println(
-                                "HTTP server started on port " + server.actualPort()
+                                "HTTP server started on port " + httpServer.actualPort()
                         )
                 );
+
+        return Uni.combine().all().unis(dataBaseBootstrap.bootstrap(), startHttpServer).discardItems();
     }
 }

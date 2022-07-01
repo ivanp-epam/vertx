@@ -1,107 +1,85 @@
 package com.programm.vertx.handler;
 
-import com.programm.vertx.dto.UserDto;
-import com.programm.vertx.dto.UserInput;
-import com.programm.vertx.http.ResponseHelper;
-import com.programm.vertx.http.StatusCodes;
-import com.programm.vertx.repository.IRepository;
-import com.programm.vertx.response.*;
-import io.vertx.ext.web.RequestBody;
-import io.vertx.ext.web.RoutingContext;
+import com.programm.vertx.entities.User;
+import com.programm.vertx.exceptions.HttpException;
+import com.programm.vertx.repository.IUserRepository;
+import com.programm.vertx.request.UserRequest;
+import com.programm.vertx.request.UsersFilterRequest;
+import com.programm.vertx.response.ResponseWrapper;
+import com.programm.vertx.response.UserResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.smallrye.mutiny.Uni;
+import io.vertx.core.json.Json;
+import io.vertx.mutiny.core.http.HttpServerRequest;
+import io.vertx.mutiny.ext.web.RoutingContext;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class UsersHandler {
-    private final IRepository<UserDto> repository;
+    private final IUserRepository repository;
 
-    public UsersHandler(IRepository<UserDto> repository) {
+    public UsersHandler(IUserRepository repository) {
         this.repository = repository;
     }
 
     public void getAll(RoutingContext ctx) {
-        String startsFrom = ctx.request().getParam("startsFrom");
-        String limitStr = ctx.request().getParam("limit");
-        String offsetStr = ctx.request().getParam("offset");
+        HttpServerRequest request = ctx.request();
 
-        int limit = 10;
-        int offset = 0;
-
-        if (limitStr != null) {
-            try {
-                limit = Integer.parseInt(limitStr);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-
-        if (offsetStr != null) {
-            try {
-                offset = Integer.parseInt(offsetStr);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-
-        Map<String, UserDto> result = repository.findAll();
-
-        if (startsFrom != null) {
-            String startsFromLowerCase = startsFrom.toLowerCase();
-            result = result.entrySet().stream()
-                    .filter(entry -> entry.getValue().getLogin().toLowerCase().startsWith(startsFromLowerCase))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        }
-
-        int total = result.size();
-
-        Map<String, UserResponse> responseAll = result.entrySet().stream().skip(offset).limit(limit)
-                .map(entry -> Map.entry(entry.getKey(), UserResponse.from(entry.getValue())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        ResponseHelper.json(ctx.response(), new ResponseWrapper<>(responseAll,
-                new Pagination(total, offset, limit))
+        UsersFilterRequest usersFilterRequest = new UsersFilterRequest(
+                request.getParam("startsFrom"),
+                request.getParam("limit"),
+                request.getParam("offset")
         );
+
+        Uni<ResponseWrapper<Map<String, UserResponse>>> byPrefix = repository.findByPrefix(usersFilterRequest);
+
+        byPrefix
+                .onFailure().invoke(ctx::fail)
+                .subscribe().with(ctx::jsonAndForget);
     }
 
-    public void create(RoutingContext ctx) {
-        RequestBody body = ctx.body();
-        UserInput userInput = body.asJsonObject().mapTo(UserInput.class);
-        UserDto dto = repository.add(UserDto.from(userInput));
+    public void create(RoutingContext ctx) throws HttpException {
+        UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
+        Uni<User> dto = repository.add(User.from(userRequest));
 
-        ResponseHelper.json(ctx.response(), UserResponse.from(dto));
+        dto.map(UserResponse::from)
+                .onFailure().invoke(ctx::fail)
+                .subscribe().with(ctx::jsonAndForget);
     }
 
-    public void get(RoutingContext ctx) {
-        UserDto dto = repository.find(ctx.pathParam("id"));
-        if (dto == null) {
-            ResponseHelper.json(ctx.response(), StatusCodes.NOT_FOUND, new ErrorResponseWrapper(ErrorResponse.NOT_FOUND()));
-            return;
-        }
-        ResponseHelper.json(ctx.response(), UserResponse.from(dto));
+    public void get(RoutingContext ctx) throws HttpException {
+        Uni<User> dto = repository.get(ctx.pathParam("id"));
+
+        dto.map(UserResponse::from)
+                .onFailure().invoke(ctx::fail)
+                .subscribe().with(ctx::jsonAndForget);
     }
 
-    public void put(RoutingContext ctx) {
+    public void put(RoutingContext ctx) throws HttpException {
         String uuid = ctx.pathParam("id");
-        UserDto dto = repository.find(uuid);
 
-        if (dto == null) {
-            ResponseHelper.json(ctx.response(), StatusCodes.NOT_FOUND, new ErrorResponseWrapper(ErrorResponse.NOT_FOUND()));
-            return;
-        }
-        UserDto from = UserDto.from(ctx.body().asJsonObject().mapTo(UserInput.class));
-        from.setId(uuid);
-        repository.update(from);
+        Uni<User> user = repository.get(uuid);
 
-        ResponseHelper.json(ctx.response(), UserResponse.from(from));
+        Uni<User> invoke = user
+                .map(userEl -> {
+                    UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
+                    return userEl.with(userRequest);
+                })
+                .call(repository::update);
+
+        invoke
+                .onFailure().invoke(ctx::fail)
+                .map(UserResponse::from).subscribe().with(ctx::jsonAndForget);
     }
 
-    public void delete(RoutingContext ctx) {
-        UserDto dto = repository.find(ctx.pathParam("id"));
-        if (dto == null) {
-            ResponseHelper.json(ctx.response(), StatusCodes.NOT_FOUND, new ErrorResponseWrapper(ErrorResponse.NOT_FOUND()));
-            return;
-        }
-        repository.delete(dto);
+    public void delete(RoutingContext ctx) throws HttpException {
+        String id = ctx.pathParam("id");
 
-        ctx.response().setStatusCode(StatusCodes.NO_CONTENT).end();
+        Uni<User> dto = repository.get(id);
+        dto.onItem().call(repository::delete)
+                .onFailure().invoke(ctx::fail)
+                .subscribe().with((el) -> {
+                    ctx.response().setStatusCode(HttpResponseStatus.NO_CONTENT.code()).endAndForget();
+                });
     }
-
 }

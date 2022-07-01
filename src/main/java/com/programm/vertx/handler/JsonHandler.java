@@ -1,41 +1,25 @@
 package com.programm.vertx.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.programm.vertx.http.ResponseHelper;
-import com.programm.vertx.http.StatusCodes;
-import com.programm.vertx.response.ErrorResponse;
-import com.programm.vertx.response.ErrorResponseWrapper;
-import io.vertx.core.Handler;
-import io.vertx.ext.web.RoutingContext;
+import com.programm.vertx.exceptions.MalformedJsonException;
+import io.vertx.mutiny.ext.web.RoutingContext;
 
-import java.io.IOException;
+import java.util.function.Consumer;
 
-public class JsonHandler implements Handler<RoutingContext> {
-    public static boolean isJSONValid(String jsonInString) {
-        // mark null value as valid JSON
-        if (jsonInString == null) {
-            return true;
-        }
+import static com.programm.vertx.helper.JsonHelper.isJSONValid;
 
-        try {
-            final ObjectMapper mapper = new ObjectMapper();
-            mapper.readTree(jsonInString);
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
+public class JsonHandler implements Consumer<RoutingContext> {
 
     public void handle(RoutingContext ctx) {
-        if (isJSONValid(ctx.body().asString())) {
+        if (isJSONValid(ctx.getBodyAsString())) {
             ctx.next();
             return;
         }
 
-        ResponseHelper.json(
-                ctx.response(),
-                StatusCodes.BAD_REQUEST,
-                new ErrorResponseWrapper(ErrorResponse.MALFORMED_JSON())
-        );
+        throw new MalformedJsonException();
+    }
+
+    @Override
+    public void accept(RoutingContext routingContext) {
+        handle(routingContext);
     }
 }

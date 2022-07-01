@@ -2,21 +2,13 @@ package com.programm.vertx.handler;
 
 import am.ik.yavi.core.ConstraintViolations;
 import am.ik.yavi.core.Validator;
-import com.programm.vertx.http.ResponseHelper;
-import com.programm.vertx.http.StatusCodes;
-import com.programm.vertx.response.ErrorDetail;
-import com.programm.vertx.response.ErrorResponse;
-import com.programm.vertx.response.ErrorResponseWrapper;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
+import com.programm.vertx.exceptions.ValidationException;
+import com.programm.vertx.helper.JsonHelper;
+import io.vertx.mutiny.ext.web.RoutingContext;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
 
-public class ValidationHandler<T> implements Handler<RoutingContext> {
+public class ValidationHandler<T> implements Consumer<RoutingContext> {
 
     private final Validator<T> validator;
     private final Class<T> clazz;
@@ -26,23 +18,10 @@ public class ValidationHandler<T> implements Handler<RoutingContext> {
         this.clazz = clazz;
     }
 
-    @Override
     public void handle(RoutingContext event) {
-        JsonObject entries = event.body().asJsonObject();
-        T object;
+        String entries = event.getBodyAsString();
 
-        if (entries == null) {
-
-            try {
-                object = clazz.getDeclaredConstructor().newInstance();
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e);
-            }
-
-        } else {
-            object = entries.mapTo(clazz);
-        }
-
+        T object = JsonHelper.fromJsonObject(entries, clazz);
         ConstraintViolations validate = validator.validate(object);
 
         if (validate.isValid()) {
@@ -50,22 +29,11 @@ public class ValidationHandler<T> implements Handler<RoutingContext> {
             return;
         }
 
-        Map<String, List<ErrorDetail>> details = new HashMap<>();
+        throw new ValidationException(validate.violations());
+    }
 
-        validate.violations()
-                .forEach(constraintViolation -> {
-                    if (!details.containsKey(constraintViolation.name())) {
-                        details.put(constraintViolation.name(), new ArrayList<>());
-                    }
-
-                    details.get(constraintViolation.name())
-                            .add(new ErrorDetail(constraintViolation.messageKey(), constraintViolation.message()));
-                });
-
-        ResponseHelper.json(
-                event.response(),
-                StatusCodes.BAD_REQUEST,
-                new ErrorResponseWrapper(ErrorResponse.VALIDATION_ERROR(details))
-        );
+    @Override
+    public void accept(RoutingContext routingContext) {
+        handle(routingContext);
     }
 }

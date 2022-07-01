@@ -1,0 +1,220 @@
+openapi: 3.0.0
+info:
+  title: OpenApi for test purposes
+  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
+  version: task3
+servers:
+  - url: /api/
+paths:
+  /users:
+    get:
+      summary: Get list of users.
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - name: startsFrom
+          in: query
+          required: false
+          description: "Filter result by prefix"
+        - name: limit
+          in: query
+          required: false
+          description: "How many record should be returned"
+        - name: offset
+          in: query
+          required: false
+          description: "How many record should be skipped"
+      responses:
+        '200': # status code
+          description: A JSON result set of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserList"
+    post:
+      summary: Add user
+      description: Optional extended description in CommonMark or HTML.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/User"
+                - required:
+                    - login
+                    - password
+                    - age
+      responses:
+        '200': # status code
+          description: A JSON result of created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          $ref: "#/components/responses/400"
+  /users/{uuid}:
+    get:
+      summary: Get User
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+      responses:
+        '200': # status code
+          description: A JSON array of user names
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '404':
+          description: Entity is not found
+    put:
+      summary: Modify user
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/User"
+                - required:
+                    - id
+                    - login
+                    - password
+                    - age
+      responses:
+        '200': # status code
+          description: A JSON result of created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          $ref: "#/components/responses/400"
+        '404':
+          description: Entity is not found
+    delete:
+      summary: Delete user
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+      responses:
+        '204':
+          description: An entity deleted successfully
+        '404':
+          description: Entity is not found
+components:
+  responses:
+    '204':
+      description: An entity deleted successfully
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: Unique client error code
+                    example: 2
+                  message:
+                    type: string
+                    description: Short description of the error
+                    example: "Validation error"
+                  details:
+                    type: object
+                    description: Error details in format Map<String, List<ErrorDetails>>
+                    example:
+                      password:
+                        - key: charSequence.notBlank
+                          message: '"password" must not be blank'
+                      age:
+                        - key: numeric.greaterThanOrEqual
+                          message: '"age" must be greater than or equal to 4'
+                    additionalProperties:
+                      type: array
+                      description: "List of Error's Details"
+                      items:
+                        type: object
+                        description: "Error Detail"
+                        properties:
+                          key:
+                            type: string
+                          message:
+                            type: string
+
+    '404':
+      description: Entity is not found
+  parameters:
+    UUID:
+      name: uuid
+      in: path
+      required: true
+      description: Resource UUID
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 15
+        skip:
+          type: integer
+          example: 0
+        perPage:
+          type: integer
+          example: 10
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        login:
+          type: string
+          example: "John Doe"
+        password:
+          type: string
+          example: "12345ASDFGQWRER"
+        age:
+          type: integer
+          example: 100
+    UserList:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/User"
+          example:
+            "123e4567-e89b-12d3-a456-426614174000":
+              "id": "123e4567-e89b-12d3-a456-426614174000"
+              "login": "John Doe1"
+              "password": "12345"
+              "age": "10"
+            "123e4567-e89b-12d3-a456-426614174001":
+              "id": "123e4567-e89b-12d3-a456-426614174001"
+              "login": "John Doe2"
+              "password": "12345"
+              "age": "10"
+            "123e4567-e89b-12d3-a456-426614174002":
+              "id": "123e4567-e89b-12d3-a456-426614174002"
+              "login": "John Doe3"
+              "password": "12345"
+              "age": "10"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+#      # Both properties are required
+#      required:
+#        - id
+#        - name
