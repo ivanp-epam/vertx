@@ -7,6 +7,7 @@
         <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>  <!--(1)-->
 
         <class>com.programm.vertx.entities.User</class> <!--(2)-->
+        <class>com.programm.vertx.entities.Group</class> <!--(2)-->
 
         <properties>
 

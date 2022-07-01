@@ -8,6 +8,8 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -37,6 +39,13 @@ public class User implements Serializable {
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_groups",
+            joinColumns = @JoinColumn(name = "users_id"),
+            inverseJoinColumns = @JoinColumn(name = "groups_id")
+    )
+    private List<Group> groups = new ArrayList<>();
 
     public User() {
 
@@ -105,6 +114,15 @@ public class User implements Serializable {
 
     public User setDeleted(boolean deleted) {
         isDeleted = deleted;
+        return this;
+    }
+
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    public User setGroups(List<Group> groups) {
+        this.groups = groups;
         return this;
     }
 }

@@ -1,19 +1,29 @@
 package com.programm.vertx.response;
 
+import com.programm.vertx.entities.Group;
 import com.programm.vertx.entities.User;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserResponse {
     private String id;
     private String login;
     private String password;
     private int age;
+    private List<GroupResponse> groups = new ArrayList<>();
 
     public static UserResponse from(User dto) {
+        List<GroupResponse> groups = new ArrayList<>();
+        dto.getGroups().forEach(group -> groups.add(new GroupResponse(group)));
+
         return new UserResponse()
                 .setAge(dto.getAge())
                 .setId(dto.getStringId())
                 .setLogin(dto.getLogin())
-                .setPassword(dto.getPassword());
+                .setPassword(dto.getPassword())
+                .setGroups(groups);
     }
 
     public String getId() {
@@ -50,5 +60,27 @@ public class UserResponse {
     public UserResponse setAge(int age) {
         this.age = age;
         return this;
+    }
+
+    public List<GroupResponse> getGroups() {
+        return groups;
+    }
+
+    public UserResponse setGroups(List<GroupResponse> groups) {
+        this.groups = groups;
+        return this;
+    }
+
+    private static class GroupResponse {
+        private final String uuid;
+        private final String name;
+        private final List<String> permissions;
+
+        public GroupResponse(Group group) {
+            this.uuid = group.getId().toString();
+            this.name = group.getName();
+//            this.permissions = group.getPermissions();
+            this.permissions = group.getPermissions().stream().map(Enum::name).collect(Collectors.toList());
+        }
     }
 }
