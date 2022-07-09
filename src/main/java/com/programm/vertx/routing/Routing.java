@@ -1,6 +1,6 @@
 package com.programm.vertx.routing;
 
-import com.programm.vertx.bootstrap.DataBaseBootstrap;
+import com.programm.vertx.bootstrap.IDataBaseBootstrap;
 import com.programm.vertx.handler.JsonHandler;
 import com.programm.vertx.handler.UsersHandler;
 import com.programm.vertx.handler.ValidationHandler;
@@ -17,9 +17,9 @@ import static io.vertx.ext.web.handler.FileSystemAccess.RELATIVE;
 
 public class Routing {
 
-    private final DataBaseBootstrap bootstrap;
+    private final IDataBaseBootstrap bootstrap;
 
-    public Routing(DataBaseBootstrap bootstrap) {
+    public Routing(IDataBaseBootstrap bootstrap) {
         this.bootstrap = bootstrap;
     }
 

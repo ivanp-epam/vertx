@@ -2,6 +2,7 @@ package com.programm.vertx.bootstrap;
 
 import com.programm.vertx.config.ApplicationConfig;
 import com.programm.vertx.repository.IUserRepository;
+import com.programm.vertx.repository.RepositoryManager;
 import com.programm.vertx.repository.hibernate.UserRepository;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.Vertx;
@@ -10,7 +11,7 @@ import org.hibernate.reactive.mutiny.Mutiny;
 import javax.persistence.Persistence;
 import java.util.Map;
 
-public class DataBaseBootstrap {
+public class DataBaseBootstrap implements IDataBaseBootstrap {
 
     private final ApplicationConfig config;
     private final Vertx vertx;
@@ -51,5 +52,10 @@ public class DataBaseBootstrap {
 
         return vertx.executeBlocking(startHibernate)  // (2)
                 .onItem().invoke(() -> System.out.println("✅ Hibernate Reactive is ready"));
+    }
+
+    @Override
+    public RepositoryManager getManager() {
+        return null;
     }
 }

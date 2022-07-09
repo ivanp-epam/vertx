@@ -1,13 +1,14 @@
 package com.programm.vertx.response;
 
 import com.programm.vertx.entities.Group;
+import com.programm.vertx.entities.Permission;
 import com.programm.vertx.entities.User;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class UserResponse {
+public class UserResponse implements Serializable {
     private String id;
     private String login;
     private String password;
@@ -71,16 +72,27 @@ public class UserResponse {
         return this;
     }
 
-    private static class GroupResponse {
+    public static class GroupResponse implements Serializable {
         private final String uuid;
         private final String name;
-        private final List<String> permissions;
+        private final List<Permission> permissions;
 
         public GroupResponse(Group group) {
             this.uuid = group.getId().toString();
             this.name = group.getName();
-//            this.permissions = group.getPermissions();
-            this.permissions = group.getPermissions().stream().map(Enum::name).collect(Collectors.toList());
+            this.permissions = group.getPermissions();
+        }
+
+        public String getUuid() {
+            return uuid;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<Permission> getPermissions() {
+            return permissions;
         }
     }
 }

@@ -1,14 +1,11 @@
 package com.programm.vertx.entities;
 
-import com.vladmihalcea.hibernate.type.array.ListArrayType;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity

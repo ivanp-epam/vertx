@@ -17,13 +17,20 @@ repositories {
 
 val vertxVersion = "4.3.1"
 val junitJupiterVersion = "5.8.2"
-val mutinyVertXVersion = "2.22.0"
+val mutinyVertXVersion = "2.24.0"
 
 val mainVerticleName = "com.programm.vertx.MainVerticle"
 val launcherClassName = "io.vertx.core.Launcher"
 
 val watchForChange = "src/**/*"
 val doOnChange = "${projectDir}/gradlew classes"
+
+val jooqVersion = "3.16.6"
+val jooqRxVersion = "6.5.4"
+val jacksonDatabindVersion = "2.13.3"
+val postgresqlVersion = "42.3.6"
+//<mutiny.version>1.3.1</mutiny.version>
+//<mutiny.bingings.version>2.18.0</mutiny.bingings.version>
 
 application {
   mainClass.set(launcherClassName)
@@ -32,9 +39,8 @@ application {
 dependencies {
   liquibaseRuntime("org.liquibase:liquibase-core:4.11.0")
   liquibaseRuntime("org.liquibase:liquibase-groovy-dsl:3.0.2")
-  liquibaseRuntime("org.postgresql:postgresql:42.3.6")
+  liquibaseRuntime("org.postgresql:postgresql:$postgresqlVersion")
 
-  implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
   implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
   implementation("io.vertx:vertx-core")
   implementation("io.vertx:vertx-web:$vertxVersion")
@@ -43,10 +49,15 @@ dependencies {
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-core:$mutinyVertXVersion")
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-web:$mutinyVertXVersion")
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-pg-client:$mutinyVertXVersion")
-  implementation("org.hibernate.reactive:hibernate-reactive-core:1.1.6.Final")
-  implementation("com.vladmihalcea:hibernate-types-55:2.16.3")
+  implementation("io.smallrye.reactive:smallrye-mutiny-vertx-sql-client:$mutinyVertXVersion")
   implementation("ch.qos.logback:logback-classic:1.2.11")
   implementation("am.ik.yavi:yavi:0.11.3")
+  implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}")
+
+  // -- delete it!
+  implementation("org.hibernate.reactive:hibernate-reactive-core:1.1.6.Final")
+  implementation("com.vladmihalcea:hibernate-types-55:2.16.3")
+  // -- delete it!
 
   runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.77.Final:osx-x86_64")
 
@@ -61,12 +72,13 @@ java {
   targetCompatibility = JavaVersion.VERSION_17
 }
 
+val dbUrl: String by project.extra.properties
+val dbUser: String by project.extra.properties
+val dbPassword: String by project.extra.properties
+val dbDriver: String by project.extra.properties
+
 liquibase {
   activities.register("main") {
-    val dbUrl by project.extra.properties
-    val dbUser by project.extra.properties
-    val dbPassword by project.extra.properties
-
     this.arguments = mapOf(
             "logLevel" to "info",
             "changeLogFile" to "src/main/resources/db/changelog.xml",
@@ -78,7 +90,6 @@ liquibase {
   }
   runList = "main"
 }
-
 
 tasks.withType<ShadowJar> {
   archiveClassifier.set("fat")
