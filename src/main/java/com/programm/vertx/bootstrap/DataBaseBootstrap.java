@@ -40,7 +40,7 @@ public class DataBaseBootstrap implements IDataBaseBootstrap {
         return sessionFactory;
     }
 
-    public IUserRepository getRepository() {
+    public IUserRepository getUserRepository() {
         return new UserRepository(getSessionFactory());
     }
 

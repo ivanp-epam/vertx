@@ -1,10 +1,15 @@
-package com.programm.vertx.handler;
+package com.programm.vertx.controllers;
 
+import com.programm.vertx.entities.Group;
 import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.HttpException;
+import com.programm.vertx.repository.IGroupRepository;
+import com.programm.vertx.repository.IRepository;
 import com.programm.vertx.repository.IUserRepository;
+import com.programm.vertx.request.GroupRequest;
 import com.programm.vertx.request.UserRequest;
 import com.programm.vertx.request.UsersFilterRequest;
+import com.programm.vertx.response.GroupResponse;
 import com.programm.vertx.response.ResponseWrapper;
 import com.programm.vertx.response.UserResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -13,44 +18,39 @@ import io.vertx.core.json.Json;
 import io.vertx.mutiny.core.http.HttpServerRequest;
 import io.vertx.mutiny.ext.web.RoutingContext;
 
+import javax.security.auth.login.LoginException;
 import java.util.Map;
 
-public class UsersHandler {
-    private final IUserRepository repository;
+public class GroupsHandler {
+    private final IGroupRepository repository;
 
-    public UsersHandler(IUserRepository repository) {
+    public GroupsHandler(IGroupRepository repository) {
         this.repository = repository;
     }
 
     public void getAll(RoutingContext ctx) {
         HttpServerRequest request = ctx.request();
+        int limit = Integer.parseInt(request.getParam("limit", "10"));
+        int offset = Integer.parseInt(request.getParam("offset", "0"));
 
-        UsersFilterRequest usersFilterRequest = new UsersFilterRequest(
-                request.getParam("startsFrom"),
-                request.getParam("limit"),
-                request.getParam("offset")
-        );
-
-        Uni<ResponseWrapper<Map<String, UserResponse>>> byPrefix = repository.findByPrefix(usersFilterRequest);
-
-        byPrefix
+        repository.findPaginated(limit, offset)
                 .onFailure().invoke(ctx::fail)
                 .subscribe().with(ctx::jsonAndForget);
     }
 
     public void create(RoutingContext ctx) throws HttpException {
-        UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
-        Uni<User> dto = repository.add(User.from(userRequest));
+        GroupRequest groupRequest = Json.decodeValue(ctx.body().getDelegate().buffer(), GroupRequest.class);
+        Uni<Group> dto = repository.add(Group.from(groupRequest));
 
-        dto.map(UserResponse::from)
+        dto.map(GroupResponse::from)
                 .onFailure().invoke(ctx::fail)
                 .subscribe().with(ctx::jsonAndForget);
     }
 
     public void get(RoutingContext ctx) throws HttpException {
-        Uni<User> dto = repository.get(ctx.pathParam("id"));
+        Uni<Group> dto = repository.get(ctx.pathParam("id"));
 
-        dto.map(UserResponse::from)
+        dto.map(GroupResponse::from)
                 .onFailure().invoke(ctx::fail)
                 .subscribe().with(ctx::jsonAndForget);
     }
@@ -58,24 +58,22 @@ public class UsersHandler {
     public void put(RoutingContext ctx) throws HttpException {
         String uuid = ctx.pathParam("id");
 
-        Uni<User> user = repository.get(uuid);
+        Uni<Group> user = repository.get(uuid);
 
-        Uni<User> invoke = user
-                .map(userEl -> {
-                    UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
-                    return userEl.with(userRequest);
-                })
+        GroupRequest groupRequest = Json.decodeValue(ctx.getBody().getDelegate(), GroupRequest.class);
+
+        Uni<Group> invoke = user
+                .map(el -> Group.from(groupRequest).setId(el.getId()))
                 .call(repository::update);
 
         invoke
                 .onFailure().invoke(ctx::fail)
-                .map(UserResponse::from).subscribe().with(ctx::jsonAndForget);
+                .map(GroupResponse::from).subscribe().with(ctx::jsonAndForget);
     }
 
     public void delete(RoutingContext ctx) throws HttpException {
         String id = ctx.pathParam("id");
-
-        Uni<User> dto = repository.get(id);
+        Uni<Group> dto = repository.get(id);
         dto.onItem().call(repository::delete)
                 .onFailure().invoke(ctx::fail)
                 .subscribe().with((el) -> {

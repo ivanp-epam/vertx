@@ -1,5 +1,6 @@
 package com.programm.vertx.entities;
 
+import com.programm.vertx.request.GroupRequest;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
@@ -7,6 +8,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "groups")
@@ -32,6 +34,15 @@ public class Group {
     @ManyToMany(targetEntity = User.class, mappedBy = "groups", fetch = FetchType.EAGER)
     private List<User> users = new ArrayList<>();
 
+    public static Group from(GroupRequest groupRequest) {
+        return new Group().setName(groupRequest.getName())
+                .setPermissions(groupRequest.getPermissions()
+                        .stream()
+                        .map(Permission::valueOf)
+                        .collect(Collectors.toList())
+                );
+    }
+
     public UUID getId() {
         return id;
     }
@@ -39,6 +50,10 @@ public class Group {
     public Group setId(UUID id) {
         this.id = id;
         return this;
+    }
+
+    public String getIdAsString() {
+        return id.toString();
     }
 
     public String getName() {
@@ -57,6 +72,10 @@ public class Group {
     public Group setPermissions(List<Permission> permissions) {
         this.permissions = permissions;
         return this;
+    }
+
+    public String[] getPermissionsAsStrings() {
+        return permissions.stream().map(Permission::name).toList().toArray(String[]::new);
     }
 
     public List<User> getUsers() {

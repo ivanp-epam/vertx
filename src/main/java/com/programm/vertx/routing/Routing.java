@@ -1,12 +1,14 @@
 package com.programm.vertx.routing;
 
 import com.programm.vertx.bootstrap.IDataBaseBootstrap;
-import com.programm.vertx.handler.JsonHandler;
-import com.programm.vertx.handler.UsersHandler;
-import com.programm.vertx.handler.ValidationHandler;
+import com.programm.vertx.controllers.GroupsHandler;
+import com.programm.vertx.handler.middleware.JsonHandler;
+import com.programm.vertx.controllers.UsersHandler;
+import com.programm.vertx.handler.middleware.ValidationHandler;
 import com.programm.vertx.handler.errorHandlers.RouteHandlerManager;
+import com.programm.vertx.request.GroupRequest;
 import com.programm.vertx.request.UserRequest;
-import com.programm.vertx.validators.UsersValidator;
+import com.programm.vertx.validators.Validators;
 import io.vertx.ext.web.handler.impl.StaticHandlerImpl;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.Router;
@@ -31,6 +33,7 @@ public class Routing {
         router.route().handler(new JsonHandler());
 
         router.route("/api/*").subRouter(users(vertx));
+        router.route("/api/*").subRouter(groups(vertx));
 
         errorHandler(router);
         return router;
@@ -47,23 +50,40 @@ public class Routing {
 
     public Router users(Vertx vertx) {
 
-        UsersHandler usersHandler = new UsersHandler(bootstrap.getRepository());
-//        UsersHandler usersHandler = new UsersHandler(new UserRepository());
+        UsersHandler usersHandler = new UsersHandler(bootstrap.getManager().getUserRepository());
 
         Router router = Router.router(vertx);
 
         router.get("/users").handler(usersHandler::getAll);
         router.post("/users")
-                .handler(new ValidationHandler<>(UsersValidator.validator, UserRequest.class))
+                .handler(new ValidationHandler<>(Validators.USER_VALIDATOR, UserRequest.class))
                 .handler(usersHandler::create);
 
         router.get("/users/:id").handler(usersHandler::get);
-
         router.put("/users/:id")
-                .handler(new ValidationHandler<>(UsersValidator.validator, UserRequest.class))
+                .handler(new ValidationHandler<>(Validators.USER_VALIDATOR, UserRequest.class))
                 .handler(usersHandler::put);
-
         router.delete("/users/:id").handler(usersHandler::delete);
+
+        return router;
+    }
+
+    public Router groups(Vertx vertx) {
+
+        GroupsHandler groupsHandler = new GroupsHandler(bootstrap.getManager().getGroupRepository());
+
+        Router router = Router.router(vertx);
+
+        router.get("/groups").handler(groupsHandler::getAll);
+        router.post("/groups")
+                .handler(new ValidationHandler<>(Validators.GROUP_VALIDATOR, GroupRequest.class))
+                .handler(groupsHandler::create);
+
+        router.get("/groups/:id").handler(groupsHandler::get);
+        router.put("/groups/:id")
+                .handler(new ValidationHandler<>(Validators.GROUP_VALIDATOR, GroupRequest.class))
+                .handler(groupsHandler::put);
+        router.delete("/groups/:id").handler(groupsHandler::delete);
 
         return router;
     }

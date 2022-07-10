@@ -1,8 +1,10 @@
 package com.programm.vertx.repository;
 
-import com.programm.vertx.repository.pgclient.GroupRepository;
+import com.programm.vertx.entities.Group;
 
 public interface IRepositoryManager {
 
-    public GroupRepository getGroupRepository();
+    public IGroupRepository getGroupRepository();
+
+    public IUserRepository getUserRepository();
 }

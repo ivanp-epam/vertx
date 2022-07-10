@@ -1,5 +1,6 @@
 package com.programm.vertx.repository.hibernate;
 
+import com.programm.vertx.entities.Group;
 import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.EntityNotFoundException;
 import com.programm.vertx.repository.IUserRepository;
@@ -13,6 +14,7 @@ import org.hibernate.reactive.mutiny.Mutiny;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -119,5 +121,10 @@ public class UserRepository implements IUserRepository {
                 .all().unis(userResponse, total).combinedWith(
                         (responseMap, i) -> new ResponseWrapper<>(responseMap,
                                 new Pagination(i, filter.getOffset(), filter.getLimit())));
+    }
+
+    @Override
+    public Uni<List<User>> getUsersByGroup(Group user) {
+        return null;
     }
 }

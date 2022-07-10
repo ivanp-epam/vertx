@@ -8,7 +8,6 @@ import com.programm.vertx.repository.pgclient.UserRepository;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.pgclient.PgPool;
-import io.vertx.mutiny.sqlclient.SqlClient;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.sqlclient.PoolOptions;
 
@@ -36,12 +35,8 @@ public class PgClientBootstrap implements IDataBaseBootstrap {
                 .setMaxSize(5);
     }
 
-    public SqlClient getClient() {
-        return PgPool.client(vertx, makeConnectionOptions(), makePoolOptions());
-    }
-
-    public IUserRepository getRepository() {
-        return new UserRepository(getClient(), getManager());
+    public PgPool getClient() {
+        return PgPool.pool(vertx, makeConnectionOptions(), makePoolOptions());
     }
 
     @Override
@@ -49,12 +44,9 @@ public class PgClientBootstrap implements IDataBaseBootstrap {
         return Uni.createFrom().voidItem();
     }
 
-    public GroupRepository getGroupRepository() {
-        return new GroupRepository(getClient());
-    }
 
     @Override
     public RepositoryManager getManager() {
-        return new RepositoryManager(getGroupRepository());
+        return new RepositoryManager(getClient());
     }
 }

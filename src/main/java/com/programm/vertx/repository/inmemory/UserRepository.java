@@ -1,5 +1,6 @@
 package com.programm.vertx.repository.inmemory;
 
+import com.programm.vertx.entities.Group;
 import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.EntityNotFoundException;
 import com.programm.vertx.repository.IUserRepository;
@@ -10,6 +11,7 @@ import com.programm.vertx.response.UserResponse;
 import io.smallrye.mutiny.Uni;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -95,5 +97,10 @@ public class UserRepository implements IUserRepository {
 
         return Uni.combine().all().unis(collect, total).combinedWith((responseMap, totalNum) -> new ResponseWrapper<>(responseMap,
                 new Pagination(totalNum, offset, limit)));
+    }
+
+    @Override
+    public Uni<List<User>> getUsersByGroup(Group user) {
+        return null;
     }
 }

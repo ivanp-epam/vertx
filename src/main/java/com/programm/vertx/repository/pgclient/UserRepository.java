@@ -11,6 +11,7 @@ import com.programm.vertx.response.ResponseWrapper;
 import com.programm.vertx.response.UserResponse;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.vertx.mutiny.pgclient.PgPool;
 import io.vertx.mutiny.sqlclient.*;
 
 import java.util.HashMap;
@@ -20,8 +21,13 @@ import java.util.function.Function;
 
 public class UserRepository implements IUserRepository {
 
-    private final SqlClient client;
+    private final PgPool client;
     private final RepositoryManager manager;
+
+    private final String GET_USERS_BY_GROUP = "SELECT u.id as id, u.login as login, u.password as password, u.age as age " +
+            "FROM users u " +
+            "INNER JOIN users_groups ug ON u.id=ug.users_id " +
+            "WHERE is_deleted = false AND ug.groups_id=$1";
 
     private final String FIND_ALL_SQL = "SELECT id, login, password, age FROM users WHERE is_deleted = false";
     private final String FIND_BY_ID_SQL = "SELECT id, login, password, age FROM users WHERE is_deleted = false AND id = $1";
@@ -36,7 +42,7 @@ public class UserRepository implements IUserRepository {
     private final String UPDATE_SQL = "UPDATE users SET login=$2, password=$3, age=$4 WHERE id=$1 returning id, login, password, age";
     private final String DELETE_SQL = "UPDATE users SET is_deleted=true WHERE id=$1 and is_deleted=false";
 
-    public UserRepository(SqlClient client, RepositoryManager manager) {
+    public UserRepository(PgPool client, RepositoryManager manager) {
         this.client = client;
         this.manager = manager;
     }
@@ -47,6 +53,16 @@ public class UserRepository implements IUserRepository {
                 .setLogin(row.getString("login"))
                 .setPassword(row.getString("password"))
                 .setAge(row.getInteger("age"));
+    }
+
+    public Uni<List<User>> getUsersByGroup(Group group) {
+        return client.preparedQuery(GET_USERS_BY_GROUP)
+                .execute(Tuple.of(group.getId()))
+                .onItem()
+                .transformToMulti(rows -> Multi.createFrom().iterable(rows))
+                .map(this::mapToUser)
+                .collect()
+                .asList();
     }
 
     @Override
