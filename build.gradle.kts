@@ -29,8 +29,6 @@ val jooqVersion = "3.16.6"
 val jooqRxVersion = "6.5.4"
 val jacksonDatabindVersion = "2.13.3"
 val postgresqlVersion = "42.3.6"
-//<mutiny.version>1.3.1</mutiny.version>
-//<mutiny.bingings.version>2.18.0</mutiny.bingings.version>
 
 application {
   mainClass.set(launcherClassName)
@@ -53,11 +51,6 @@ dependencies {
   implementation("ch.qos.logback:logback-classic:1.2.11")
   implementation("am.ik.yavi:yavi:0.11.3")
   implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}")
-
-  // -- delete it!
-  implementation("org.hibernate.reactive:hibernate-reactive-core:1.1.6.Final")
-  implementation("com.vladmihalcea:hibernate-types-55:2.16.3")
-  // -- delete it!
 
   runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.77.Final:osx-x86_64")
 

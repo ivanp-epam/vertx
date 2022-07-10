@@ -1,37 +1,20 @@
 package com.programm.vertx.entities;
 
 import com.programm.vertx.request.GroupRequest;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "groups")
 public class Group {
 
-    @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    @Type(type = "pg-uuid")
     private UUID id;
 
-    @Column(name = "name")
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "permissions")
-    @Type(type = "list-array")
     private List<Permission> permissions = new ArrayList<>();
 
-    @ManyToMany(targetEntity = User.class, mappedBy = "groups", fetch = FetchType.EAGER)
     private List<User> users = new ArrayList<>();
 
     public static Group from(GroupRequest groupRequest) {
