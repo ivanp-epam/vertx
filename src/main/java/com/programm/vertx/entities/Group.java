@@ -17,6 +17,14 @@ public class Group {
 
     private List<User> users = new ArrayList<>();
 
+    public Group() {
+
+    }
+
+    public Group(String userId) {
+        this.id = UUID.fromString(userId);
+    }
+
     public static Group from(GroupRequest groupRequest) {
         return new Group().setName(groupRequest.getName())
                 .setPermissions(groupRequest.getPermissions()

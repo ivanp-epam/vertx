@@ -7,7 +7,7 @@ import com.programm.vertx.repository.IUserRepository;
 import com.programm.vertx.repository.RepositoryManager;
 import com.programm.vertx.request.UsersFilterRequest;
 import com.programm.vertx.response.Pagination;
-import com.programm.vertx.response.ResponseWrapper;
+import com.programm.vertx.response.ResponsePaginatedWrapper;
 import com.programm.vertx.response.UserResponse;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -17,6 +17,7 @@ import io.vertx.mutiny.sqlclient.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 public class UserRepository implements IUserRepository {
@@ -28,6 +29,8 @@ public class UserRepository implements IUserRepository {
             "FROM users u " +
             "INNER JOIN users_groups ug ON u.id=ug.users_id " +
             "WHERE is_deleted = false AND ug.groups_id=$1";
+
+    private final String FIND_BY_IDS_SQL = "SELECT id, login, password, age FROM users WHERE is_deleted = false AND id = any ($1)";
 
     private final String FIND_ALL_SQL = "SELECT id, login, password, age FROM users WHERE is_deleted = false";
     private final String FIND_BY_ID_SQL = "SELECT id, login, password, age FROM users WHERE is_deleted = false AND id = $1";
@@ -88,6 +91,17 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public Uni<List<User>> findByIds(List<String> ids) {
+        return client.preparedQuery(FIND_BY_IDS_SQL)
+                .execute(Tuple.of(ids.stream().map(UUID::fromString).toArray(UUID[]::new)))
+                .onItem()
+                .transformToMulti(rows -> Multi.createFrom().iterable(rows))
+                .map(this::mapToUser)
+                .collect()
+                .asList();
+    }
+
+    @Override
     public Uni<User> get(String id) throws EntityNotFoundException {
         return this.find(id).onItem().ifNull().failWith(EntityNotFoundException::new);
     }
@@ -116,7 +130,7 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public Uni<ResponseWrapper<Map<String, UserResponse>>> findByPrefix(UsersFilterRequest filter) {
+    public Uni<ResponsePaginatedWrapper<Map<String, UserResponse>>> findByPrefix(UsersFilterRequest filter) {
 
         Uni<RowSet<Row>> execute;
         Uni<RowSet<Row>> executeCnt;
@@ -149,7 +163,7 @@ public class UserRepository implements IUserRepository {
                         .map(RowSet::iterator)
                         .map(iterator -> iterator.next().getInteger("count"))
 
-        ).combinedWith((responseMap, i) -> new ResponseWrapper<>(responseMap,
+        ).combinedWith((responseMap, i) -> new ResponsePaginatedWrapper<>(responseMap,
                 new Pagination(i, filter.getOffset(), filter.getLimit())));
     }
 }

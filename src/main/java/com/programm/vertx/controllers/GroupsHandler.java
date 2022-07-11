@@ -1,25 +1,15 @@
 package com.programm.vertx.controllers;
 
 import com.programm.vertx.entities.Group;
-import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.HttpException;
 import com.programm.vertx.repository.IGroupRepository;
-import com.programm.vertx.repository.IRepository;
-import com.programm.vertx.repository.IUserRepository;
 import com.programm.vertx.request.GroupRequest;
-import com.programm.vertx.request.UserRequest;
-import com.programm.vertx.request.UsersFilterRequest;
 import com.programm.vertx.response.GroupResponse;
-import com.programm.vertx.response.ResponseWrapper;
-import com.programm.vertx.response.UserResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.Json;
 import io.vertx.mutiny.core.http.HttpServerRequest;
 import io.vertx.mutiny.ext.web.RoutingContext;
-
-import javax.security.auth.login.LoginException;
-import java.util.Map;
 
 public class GroupsHandler {
     private final IGroupRepository repository;

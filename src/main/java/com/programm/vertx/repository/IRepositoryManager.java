@@ -7,4 +7,6 @@ public interface IRepositoryManager {
     public IGroupRepository getGroupRepository();
 
     public IUserRepository getUserRepository();
+
+    public IUserGroupRepository getUserGroupRepository();
 }

@@ -4,12 +4,11 @@ import am.ik.yavi.builder.ValidatorBuilder;
 import am.ik.yavi.constraint.CharSequenceConstraint;
 import am.ik.yavi.core.Validator;
 import com.programm.vertx.entities.Permission;
+import com.programm.vertx.request.UserIdsRequest;
 import com.programm.vertx.request.GroupRequest;
 import com.programm.vertx.request.UserRequest;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class Validators {
@@ -37,6 +36,10 @@ public class Validators {
                                     .message("Not Valid Input Values")
                     )
             )
+            .build();
+
+    public static final Validator<UserIdsRequest> GROUP_IDS_VALIDATOR = ValidatorBuilder.<UserIdsRequest>of()
+            .forEach(UserIdsRequest::getUserIds, "userIds", c -> c.constraint(String::toString, "", c1 -> c1.notNull().uuid()))
             .build();
 
 }

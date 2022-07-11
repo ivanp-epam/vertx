@@ -6,10 +6,11 @@ import com.programm.vertx.exceptions.EntityNotFoundException;
 import com.programm.vertx.repository.IUserRepository;
 import com.programm.vertx.request.UsersFilterRequest;
 import com.programm.vertx.response.Pagination;
-import com.programm.vertx.response.ResponseWrapper;
+import com.programm.vertx.response.ResponsePaginatedWrapper;
 import com.programm.vertx.response.UserResponse;
 import io.smallrye.mutiny.Uni;
 
+import javax.security.auth.login.LoginException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,11 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public Uni<List<User>> findByIds(List<String> ids) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
     public Uni<User> get(String id) throws EntityNotFoundException {
         return this.find(id).onItem().ifNull().failWith(EntityNotFoundException::new);
     }
@@ -73,7 +79,7 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public Uni<ResponseWrapper<Map<String, UserResponse>>> findByPrefix(UsersFilterRequest filter) {
+    public Uni<ResponsePaginatedWrapper<Map<String, UserResponse>>> findByPrefix(UsersFilterRequest filter) {
         Uni<Map<String, User>> all = this.findAll();
 
         String startsFrom = filter.getStartFrom();
@@ -95,12 +101,12 @@ public class UserRepository implements IUserRepository {
                 .map(entry -> Map.entry(entry.getKey(), UserResponse.from(entry.getValue())))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-        return Uni.combine().all().unis(collect, total).combinedWith((responseMap, totalNum) -> new ResponseWrapper<>(responseMap,
+        return Uni.combine().all().unis(collect, total).combinedWith((responseMap, totalNum) -> new ResponsePaginatedWrapper<>(responseMap,
                 new Pagination(totalNum, offset, limit)));
     }
 
     @Override
     public Uni<List<User>> getUsersByGroup(Group user) {
-        return null;
+        throw new RuntimeException("Not implemented yet");
     }
 }

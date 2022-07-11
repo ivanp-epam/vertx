@@ -5,7 +5,7 @@ import com.programm.vertx.exceptions.HttpException;
 import com.programm.vertx.repository.IUserRepository;
 import com.programm.vertx.request.UserRequest;
 import com.programm.vertx.request.UsersFilterRequest;
-import com.programm.vertx.response.ResponseWrapper;
+import com.programm.vertx.response.ResponsePaginatedWrapper;
 import com.programm.vertx.response.UserResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.smallrye.mutiny.Uni;
@@ -31,7 +31,7 @@ public class UsersHandler {
                 request.getParam("offset")
         );
 
-        Uni<ResponseWrapper<Map<String, UserResponse>>> byPrefix = repository.findByPrefix(usersFilterRequest);
+        Uni<ResponsePaginatedWrapper<Map<String, UserResponse>>> byPrefix = repository.findByPrefix(usersFilterRequest);
 
         byPrefix
                 .onFailure().invoke(ctx::fail)

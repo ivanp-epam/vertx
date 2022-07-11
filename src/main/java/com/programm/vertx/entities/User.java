@@ -25,6 +25,10 @@ public class User implements Serializable {
 
     }
 
+    public User(String id) {
+        this.id = UUID.fromString(id);
+    }
+
     public static User from(UserRequest input) {
         return new User()
                 .setAge(input.getAge())

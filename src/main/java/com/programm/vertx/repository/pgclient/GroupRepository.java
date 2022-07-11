@@ -8,8 +8,7 @@ import com.programm.vertx.repository.IGroupRepository;
 import com.programm.vertx.repository.RepositoryManager;
 import com.programm.vertx.response.GroupResponse;
 import com.programm.vertx.response.Pagination;
-import com.programm.vertx.response.ResponseWrapper;
-import com.programm.vertx.response.UserResponse;
+import com.programm.vertx.response.ResponsePaginatedWrapper;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.pgclient.PgPool;
@@ -80,7 +79,7 @@ public class GroupRepository implements IGroupRepository {
                 .collect().asMap(Group::getIdAsString, Function.identity());
     }
 
-    public Uni<ResponseWrapper<Map<String, GroupResponse>>> findPaginated(int limit, int offset) {
+    public Uni<ResponsePaginatedWrapper<Map<String, GroupResponse>>> findPaginated(int limit, int offset) {
 
         return Uni.combine().all().unis(
                 connection.preparedQuery(FIND_ALL_LIMIT_OFFSET_SQL)
@@ -97,7 +96,7 @@ public class GroupRepository implements IGroupRepository {
                 connection.preparedQuery(FIND_ALL_COUNT_SQL)
                         .execute().map(RowSet::iterator)
                         .map(iterator -> iterator.next().getInteger("count"))
-        ).combinedWith((responseMap, i) -> new ResponseWrapper<>(responseMap,
+        ).combinedWith((responseMap, i) -> new ResponsePaginatedWrapper<>(responseMap,
                 new Pagination(i, offset, limit)));
 
 
