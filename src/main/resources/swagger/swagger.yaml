@@ -8,21 +8,12 @@ servers:
 paths:
   /users:
     get:
+      tags:
+        - Users
       summary: Get list of users.
-      description: Optional extended description in CommonMark or HTML.
       parameters:
-        - name: startsFrom
-          in: query
-          required: false
-          description: "Filter result by prefix"
-        - name: limit
-          in: query
-          required: false
-          description: "How many record should be returned"
-        - name: offset
-          in: query
-          required: false
-          description: "How many record should be skipped"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
       responses:
         '200': # status code
           description: A JSON result set of users
@@ -31,6 +22,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserList"
     post:
+      tags:
+        - Users
       summary: Add user
       description: Optional extended description in CommonMark or HTML.
       requestBody:
@@ -55,6 +48,8 @@ paths:
           $ref: "#/components/responses/400"
   /users/{uuid}:
     get:
+      tags:
+        - Users
       summary: Get User
       parameters:
         - $ref: "#/components/parameters/UUID"
@@ -68,6 +63,8 @@ paths:
         '404':
           description: Entity is not found
     put:
+      tags:
+        - Users
       summary: Modify user
       description: Optional extended description in CommonMark or HTML.
       parameters:
@@ -96,6 +93,8 @@ paths:
         '404':
           description: Entity is not found
     delete:
+      tags:
+        - Users
       summary: Delete user
       description: Optional extended description in CommonMark or HTML.
       parameters:
@@ -105,6 +104,185 @@ paths:
           description: An entity deleted successfully
         '404':
           description: Entity is not found
+
+  /groups:
+    get:
+      tags:
+        - Groups
+      summary: Get list of groups.
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+      responses:
+        '200': # status code
+          description: A JSON result set of groups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupList"
+    post:
+      tags:
+        - Groups
+      summary: Add group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Group"
+                - required:
+                    - name
+                    - permissions
+      responses:
+        '200': # status code
+          description: A JSON result of created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        '400':
+          $ref: "#/components/responses/400"
+
+  /groups/{uuid}:
+    get:
+      tags:
+        - Groups
+      summary: Get Group
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+      responses:
+        '200': # status code
+          description: A JSON array of groups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        '404':
+          description: Entity is not found
+    put:
+      tags:
+        - Groups
+      summary: Modify group
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Group"
+                - required:
+                    - id
+                    - login
+                    - password
+                    - age
+      responses:
+        '200': # status code
+          description: A JSON result of created group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        '400':
+          $ref: "#/components/responses/400"
+        '404':
+          description: Entity is not found
+    delete:
+      tags:
+        - Groups
+      summary: Delete group
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+      responses:
+        '204':
+          description: An entity deleted successfully
+        '404':
+          description: Entity is not found
+
+  /groups/{uuid}/users:
+    get:
+      tags:
+        - UsersGroups
+      summary: Get Users from group
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+      responses:
+        '200': # status code
+          description: A JSON array of user names
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersResponse"
+        '404':
+          description: Entity is not found
+    put:
+      tags:
+        - UsersGroups
+      summary: Set users to group
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserIds"
+      responses:
+        '200': # status code
+          description: A JSON result of created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersResponse"
+        '400':
+          $ref: "#/components/responses/400"
+        '404':
+          description: Entity is not found
+    delete:
+      tags:
+        - UsersGroups
+      summary: Remove all users from group
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+      responses:
+        '204':
+          description: An entity deleted successfully
+        '404':
+          description: Entity is not found
+
+  /groups/{uuid}/users/{userId}:
+    get:
+      tags:
+        - UsersGroups
+      summary: Get particular user from group
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        '200':
+          description: An entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+        '404':
+          description: Entity is not found
+    delete:
+      tags:
+        - UsersGroups
+      summary: Remove particular user from group
+      parameters:
+        - $ref: "#/components/parameters/UUID"
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        '204':
+          description: An entity deleted successfully
+        '404':
+          description: Entity is not found
+
 components:
   responses:
     '204':
@@ -160,6 +338,32 @@ components:
       schema:
         type: string
         format: uuid
+
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: User id
+      schema:
+        type: string
+        format: uuid
+
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: "How many record should be returned"
+      schema:
+        type: integer
+
+    Offset:
+      name: offset
+      in: query
+      required: false
+      description: "How many record should be skipped"
+      schema:
+        type: integer
+
   schemas:
     Pagination:
       type: object
@@ -173,6 +377,18 @@ components:
         perPage:
           type: integer
           example: 10
+
+    UserIds:
+      type: object
+      properties:
+        userIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - userIds
+
     User:
       type: object
       properties:
@@ -189,29 +405,129 @@ components:
         age:
           type: integer
           example: 100
+
+    UserResponse:
+      allOf:
+        - $ref: "#/components/schemas/User"
+        - type: object
+          properties:
+            groups:
+              type: array
+              items:
+                $ref: "#/components/schemas/Group"
+
+    Group:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "admin"
+        permissions:
+          type: array
+          items:
+            type: string
+            enum:
+              - READ
+              - WRITE
+              - DELETE
+              - SHARE
+              - UPLOAD_FILES
+          example:
+            - READ
+            - WRITE
+            - DELETE
+            - SHARE
+            - UPLOAD_FILES
+
+    UsersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+
+    GroupsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+
+    GroupList:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Group"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
     UserList:
       type: object
       properties:
         data:
           type: object
           additionalProperties:
-            $ref: "#/components/schemas/User"
+            $ref: "#/components/schemas/UserResponse"
           example:
             "123e4567-e89b-12d3-a456-426614174000":
               "id": "123e4567-e89b-12d3-a456-426614174000"
               "login": "John Doe1"
               "password": "12345"
               "age": "10"
+              "groups": [
+                {
+                  "id": "123e4567-e89b-12d3-a456-42661417400f",
+                  "name": "admin",
+                  "permissions": ["READ", "WRITE", "DELETE", "SHARE", "UPLOAD_FILES"]
+                },
+                {
+                  "id": "123e4567-e89b-12d3-a456-4266141740af",
+                  "name": "user",
+                  "permissions": ["READ", "SHARE"]
+                }
+              ]
             "123e4567-e89b-12d3-a456-426614174001":
               "id": "123e4567-e89b-12d3-a456-426614174001"
               "login": "John Doe2"
               "password": "12345"
               "age": "10"
+              "groups": [
+                {
+                  "id": "123e4567-e89b-12d3-a456-42661417400f",
+                  "name": "admin",
+                  "permissions": ["READ", "WRITE", "DELETE", "SHARE", "UPLOAD_FILES"]
+                },
+                {
+                  "id": "123e4567-e89b-12d3-a456-4266141740af",
+                  "name": "user",
+                  "permissions": ["READ", "SHARE"]
+                }
+              ]
             "123e4567-e89b-12d3-a456-426614174002":
               "id": "123e4567-e89b-12d3-a456-426614174002"
               "login": "John Doe3"
               "password": "12345"
               "age": "10"
+              "groups": [
+                {
+                  "id": "123e4567-e89b-12d3-a456-42661417400f",
+                  "name": "admin",
+                  "permissions": ["READ", "WRITE", "DELETE", "SHARE", "UPLOAD_FILES"]
+                },
+                {
+                  "id": "123e4567-e89b-12d3-a456-4266141740af",
+                  "name": "user",
+                  "permissions": ["READ", "SHARE"]
+                }
+              ]
         pagination:
           $ref: "#/components/schemas/Pagination"
 #      # Both properties are required

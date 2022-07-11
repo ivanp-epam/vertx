@@ -1,6 +1,6 @@
 package com.programm.vertx.handler;
 
-import com.programm.vertx.helper.JsonHelper;
+import com.programm.vertx.handler.middleware.JsonHandler;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RequestBody;
 import io.vertx.ext.web.RoutingContext;
@@ -9,9 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

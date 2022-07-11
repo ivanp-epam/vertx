@@ -1,4 +1,4 @@
-package com.programm.vertx.handler;
+package com.programm.vertx.handler.middleware;
 
 import am.ik.yavi.core.ConstraintViolations;
 import am.ik.yavi.core.Validator;

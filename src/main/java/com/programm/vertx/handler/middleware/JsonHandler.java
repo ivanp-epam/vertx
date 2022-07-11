@@ -1,4 +1,4 @@
-package com.programm.vertx.handler;
+package com.programm.vertx.handler.middleware;
 
 import com.programm.vertx.exceptions.MalformedJsonException;
 import io.vertx.mutiny.ext.web.RoutingContext;

@@ -1,6 +1,7 @@
 package com.programm.vertx;
 
-import com.programm.vertx.bootstrap.DataBaseBootstrap;
+import com.programm.vertx.bootstrap.IDataBaseBootstrap;
+import com.programm.vertx.bootstrap.PgClientBootstrap;
 import com.programm.vertx.config.ApplicationConfig;
 import com.programm.vertx.routing.Routing;
 import io.smallrye.mutiny.Uni;
@@ -13,7 +14,7 @@ public class MainVerticle extends AbstractVerticle {
 
     public Uni<Void> asyncStart() {
         ApplicationConfig appConfig = new ApplicationConfig(ConfigRetriever.create(Vertx.vertx()));
-        DataBaseBootstrap dataBaseBootstrap = new DataBaseBootstrap(appConfig, vertx);
+        IDataBaseBootstrap dataBaseBootstrap = new PgClientBootstrap(appConfig, vertx);
         Routing routing = new Routing(dataBaseBootstrap);
 
         // Create the HTTP server
