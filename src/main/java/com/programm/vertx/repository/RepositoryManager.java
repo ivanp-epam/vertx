@@ -18,6 +18,10 @@ public class RepositoryManager implements IRepositoryManager {
         return new UserRepository(client, this);
     }
 
+    public IAuthRepository getAuthRepository() {
+        return new UserRepository(client, this);
+    }
+
     @Override
     public IUserGroupRepository getUserGroupRepository() {
         return new UserGroupRepository(client);

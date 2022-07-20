@@ -5,7 +5,9 @@ public enum ErrorCodes {
     VALIDATION_ERROR(2, "Validation error"),
     NOT_FOUND(3, "Resource not found"),
     INTERNAL_SERVER_ERROR(3, "Internal Serer Error"),
-    BAD_REQUEST(4, "Bad Request");
+    BAD_REQUEST(4, "Bad Request"),
+    INVALID_CREDENTIALS(5, "Invalid Credentials"),
+    UNAUTHORIZED(6, "Not Authorized");
 
     private final int code;
     private final String message;

@@ -1,12 +1,12 @@
 package com.programm.vertx.repository;
 
-import com.programm.vertx.entities.Group;
-
 public interface IRepositoryManager {
 
-    public IGroupRepository getGroupRepository();
+    IGroupRepository getGroupRepository();
 
-    public IUserRepository getUserRepository();
+    IUserRepository getUserRepository();
 
-    public IUserGroupRepository getUserGroupRepository();
+    IUserGroupRepository getUserGroupRepository();
+
+    IAuthRepository getAuthRepository();
 }

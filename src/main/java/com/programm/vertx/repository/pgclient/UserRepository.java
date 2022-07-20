@@ -3,6 +3,8 @@ package com.programm.vertx.repository.pgclient;
 import com.programm.vertx.entities.Group;
 import com.programm.vertx.entities.User;
 import com.programm.vertx.exceptions.EntityNotFoundException;
+import com.programm.vertx.exceptions.InvalidCredentialsException;
+import com.programm.vertx.repository.IAuthRepository;
 import com.programm.vertx.repository.IUserRepository;
 import com.programm.vertx.repository.RepositoryManager;
 import com.programm.vertx.request.UsersFilterRequest;
@@ -11,8 +13,12 @@ import com.programm.vertx.response.ResponsePaginatedWrapper;
 import com.programm.vertx.response.UserResponse;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.unchecked.Unchecked;
 import io.vertx.mutiny.pgclient.PgPool;
-import io.vertx.mutiny.sqlclient.*;
+import io.vertx.mutiny.sqlclient.Row;
+import io.vertx.mutiny.sqlclient.RowIterator;
+import io.vertx.mutiny.sqlclient.RowSet;
+import io.vertx.mutiny.sqlclient.Tuple;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-public class UserRepository implements IUserRepository {
+public class UserRepository implements IUserRepository, IAuthRepository {
 
     private final PgPool client;
     private final RepositoryManager manager;
@@ -44,6 +50,8 @@ public class UserRepository implements IUserRepository {
     private final String ADD_SQL = "INSERT INTO users(id, login, password, age) values ($1, $2, $3, $4) returning id, login, password, age";
     private final String UPDATE_SQL = "UPDATE users SET login=$2, password=$3, age=$4 WHERE id=$1 returning id, login, password, age";
     private final String DELETE_SQL = "UPDATE users SET is_deleted=true WHERE id=$1 and is_deleted=false";
+
+    private final String FIND_USER_BY_LOGIN_SQL = "SELECT id, login, password, age FROM users WHERE is_deleted = false AND login = $1 limit 1";
 
     public UserRepository(PgPool client, RepositoryManager manager) {
         this.client = client;
@@ -104,6 +112,29 @@ public class UserRepository implements IUserRepository {
     @Override
     public Uni<User> get(String id) throws EntityNotFoundException {
         return this.find(id).onItem().ifNull().failWith(EntityNotFoundException::new);
+    }
+
+    @Override
+    public Uni<Void> checkAuth(String login, String password) {
+        return client.preparedQuery(FIND_USER_BY_LOGIN_SQL)
+                .execute(Tuple.of(login))
+                .onItem()
+                .transformToMulti(rows -> Multi.createFrom().iterable(rows))
+                .map(this::mapToUser)
+                .toUni()
+                .onItem()
+                .ifNull()
+                .failWith(InvalidCredentialsException::new)
+                .onItem()
+                .transform(user -> password.equals(user.getPassword()))
+                .map(Unchecked.function(boolVal -> {
+                    if (boolVal) {
+                        return true;
+                    }
+                    throw new InvalidCredentialsException();
+                }))
+                .replaceWithVoid();
+
     }
 
     @Override

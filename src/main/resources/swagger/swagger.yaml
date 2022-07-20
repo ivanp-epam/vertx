@@ -21,6 +21,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserList"
+        '401':
+          $ref: "#/components/responses/401"
     post:
       tags:
         - Users
@@ -46,6 +48,8 @@ paths:
                 $ref: "#/components/schemas/User"
         '400':
           $ref: "#/components/responses/400"
+        '401':
+          $ref: "#/components/responses/401"
   /users/{uuid}:
     get:
       tags:
@@ -60,6 +64,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+
+        '401':
+          $ref: "#/components/responses/401"
+
         '404':
           description: Entity is not found
     put:
@@ -90,6 +98,8 @@ paths:
                 $ref: "#/components/schemas/User"
         '400':
           $ref: "#/components/responses/400"
+        '401':
+          $ref: "#/components/responses/401"
         '404':
           description: Entity is not found
     delete:
@@ -102,8 +112,31 @@ paths:
       responses:
         '204':
           description: An entity deleted successfully
+        '401':
+          $ref: "#/components/responses/401"
         '404':
           description: Entity is not found
+
+  /login:
+    post:
+      tags:
+        - Login
+      summary: Get list of groups.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Auth"
+      responses:
+        '200': # status code
+          description: A JSON result of created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        '400':
+          $ref: "#/components/responses/400"
 
   /groups:
     get:
@@ -143,6 +176,8 @@ paths:
                 $ref: "#/components/schemas/Group"
         '400':
           $ref: "#/components/responses/400"
+        '401':
+          $ref: "#/components/responses/401"
 
   /groups/{uuid}:
     get:
@@ -158,6 +193,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Group"
+        '401':
+          $ref: "#/components/responses/401"
         '404':
           description: Entity is not found
     put:
@@ -187,6 +224,8 @@ paths:
                 $ref: "#/components/schemas/Group"
         '400':
           $ref: "#/components/responses/400"
+        '401':
+          $ref: "#/components/responses/401"
         '404':
           description: Entity is not found
     delete:
@@ -198,6 +237,8 @@ paths:
       responses:
         '204':
           description: An entity deleted successfully
+        '401':
+          $ref: "#/components/responses/401"
         '404':
           description: Entity is not found
 
@@ -215,6 +256,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UsersResponse"
+        '401':
+          $ref: "#/components/responses/401"
         '404':
           description: Entity is not found
     put:
@@ -238,6 +281,8 @@ paths:
                 $ref: "#/components/schemas/UsersResponse"
         '400':
           $ref: "#/components/responses/400"
+        '401':
+          $ref: "#/components/responses/401"
         '404':
           description: Entity is not found
     delete:
@@ -267,7 +312,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-
+        '401':
+          $ref: "#/components/responses/401"
         '404':
           description: Entity is not found
     delete:
@@ -280,6 +326,8 @@ paths:
       responses:
         '204':
           description: An entity deleted successfully
+        '401':
+          $ref: "#/components/responses/401"
         '404':
           description: Entity is not found
 
@@ -327,6 +375,27 @@ components:
                           message:
                             type: string
 
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: Unique client error code
+                    example: 6
+                  message:
+                    type: string
+                    description: Short description of the error
+                    example: "Not Authorized"
+                  details:
+                    type: object
+                    description: Error details in format Map<String, List<ErrorDetails>>
     '404':
       description: Entity is not found
   parameters:
@@ -415,6 +484,14 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/Group"
+
+    Auth:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
 
     Group:
       type: object
@@ -530,7 +607,13 @@ components:
               ]
         pagination:
           $ref: "#/components/schemas/Pagination"
-#      # Both properties are required
-#      required:
-#        - id
-#        - name
+
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+
+security:
+  - bearerAuth: []         # use the same name as above
+

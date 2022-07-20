@@ -1,6 +1,7 @@
 package com.programm.vertx;
 
 import com.programm.vertx.bootstrap.IDataBaseBootstrap;
+import com.programm.vertx.bootstrap.JwtAuthBootstrap;
 import com.programm.vertx.bootstrap.PgClientBootstrap;
 import com.programm.vertx.config.ApplicationConfig;
 import com.programm.vertx.routing.Routing;
@@ -15,7 +16,7 @@ public class MainVerticle extends AbstractVerticle {
     public Uni<Void> asyncStart() {
         ApplicationConfig appConfig = new ApplicationConfig(ConfigRetriever.create(Vertx.vertx()));
         IDataBaseBootstrap dataBaseBootstrap = new PgClientBootstrap(appConfig, vertx);
-        Routing routing = new Routing(dataBaseBootstrap);
+        Routing routing = new Routing(dataBaseBootstrap, new JwtAuthBootstrap(vertx));
 
         // Create the HTTP server
         Uni<HttpServer> startHttpServer = vertx.createHttpServer()
