@@ -24,8 +24,7 @@ public class GroupsHandler {
         int offset = Integer.parseInt(request.getParam("offset", "0"));
 
         repository.findPaginated(limit, offset)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void create(RoutingContext ctx) throws HttpException {
@@ -33,16 +32,14 @@ public class GroupsHandler {
         Uni<Group> dto = repository.add(Group.from(groupRequest));
 
         dto.map(GroupResponse::from)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void get(RoutingContext ctx) throws HttpException {
         Uni<Group> dto = repository.get(ctx.pathParam("id"));
 
         dto.map(GroupResponse::from)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void put(RoutingContext ctx) throws HttpException {
@@ -57,17 +54,15 @@ public class GroupsHandler {
                 .call(repository::update);
 
         invoke
-                .onFailure().invoke(ctx::fail)
-                .map(GroupResponse::from).subscribe().with(ctx::jsonAndForget);
+                .map(GroupResponse::from).subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void delete(RoutingContext ctx) throws HttpException {
         String id = ctx.pathParam("id");
         Uni<Group> dto = repository.get(id);
         dto.onItem().call(repository::delete)
-                .onFailure().invoke(ctx::fail)
                 .subscribe().with((el) -> {
                     ctx.response().setStatusCode(HttpResponseStatus.NO_CONTENT.code()).endAndForget();
-                });
+                }, ctx::fail);
     }
 }

@@ -34,8 +34,7 @@ public class UsersHandler {
         Uni<ResponsePaginatedWrapper<Map<String, UserResponse>>> byPrefix = repository.findByPrefix(usersFilterRequest);
 
         byPrefix
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void create(RoutingContext ctx) throws HttpException {
@@ -43,16 +42,14 @@ public class UsersHandler {
         Uni<User> dto = repository.add(User.from(userRequest));
 
         dto.map(UserResponse::from)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void get(RoutingContext ctx) throws HttpException {
         Uni<User> dto = repository.get(ctx.pathParam("id"));
 
         dto.map(UserResponse::from)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void put(RoutingContext ctx) throws HttpException {
@@ -66,8 +63,8 @@ public class UsersHandler {
                 .call(repository::update);
 
         invoke
-                .onFailure().invoke(ctx::fail)
-                .map(UserResponse::from).subscribe().with(ctx::jsonAndForget);
+                .map(UserResponse::from)
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void delete(RoutingContext ctx) throws HttpException {
@@ -78,6 +75,6 @@ public class UsersHandler {
                 .onFailure().invoke(ctx::fail)
                 .subscribe().with((el) -> {
                     ctx.response().setStatusCode(HttpResponseStatus.NO_CONTENT.code()).endAndForget();
-                });
+                }, ctx::fail);
     }
 }

@@ -2,7 +2,6 @@ package com.programm.vertx.controllers;
 
 import com.programm.vertx.entities.Group;
 import com.programm.vertx.exceptions.BadRequestException;
-import com.programm.vertx.exceptions.ValidationException;
 import com.programm.vertx.repository.IUserGroupRepository;
 import com.programm.vertx.repository.IUserRepository;
 import com.programm.vertx.request.UserIdsRequest;
@@ -34,8 +33,7 @@ public class UserGroupHandler {
         userRepository.getUsersByGroup(group)
                 .map(users -> users.stream().map(GroupResponse.UserResponse::new).collect(Collectors.toList()))
                 .map(ResponseWrapper::new)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void getUser(RoutingContext ctx) {
@@ -47,8 +45,7 @@ public class UserGroupHandler {
                 .checkUserGroup(groupId, userId)
                 .onItem().transformToUni((notUsed) -> userRepository.get(userId))
                 .map(GroupResponse.UserResponse::new)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void updateUsers(RoutingContext ctx) {
@@ -67,8 +64,7 @@ public class UserGroupHandler {
                 .onItem().transformToUni((notUsed) -> userRepository.getUsersByGroup(new Group(groupId)))
                 .map(users -> users.stream().map(GroupResponse.UserResponse::new).collect(Collectors.toList()))
                 .map(ResponseWrapper::new)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 
     public void deleteUsersFromGroup(RoutingContext ctx) {
@@ -76,10 +72,9 @@ public class UserGroupHandler {
 
         userGroupRepository
                 .removeAllUsersFromGroup(groupId)
-                .onFailure().invoke(ctx::fail)
                 .subscribe().with((el) -> {
                     ctx.response().setStatusCode(HttpResponseStatus.NO_CONTENT.code()).endAndForget();
-                });
+                }, ctx::fail);
     }
 
     public void deleteParticularUsersFromGroup(RoutingContext ctx) {
@@ -90,9 +85,8 @@ public class UserGroupHandler {
         userGroupRepository
                 .checkUserGroup(groupId, userId)
                 .onItem().transformToUni((notUsed) -> userGroupRepository.removeUserFromGroup(groupId, userId))
-                .onFailure().invoke(ctx::fail)
                 .subscribe().with((el) -> {
                     ctx.response().setStatusCode(HttpResponseStatus.NO_CONTENT.code()).endAndForget();
-                });
+                }, ctx::fail);
     }
 }
