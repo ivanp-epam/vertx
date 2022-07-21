@@ -4,6 +4,7 @@ import am.ik.yavi.builder.ValidatorBuilder;
 import am.ik.yavi.constraint.CharSequenceConstraint;
 import am.ik.yavi.core.Validator;
 import com.programm.vertx.entities.Permission;
+import com.programm.vertx.request.AuthRequest;
 import com.programm.vertx.request.UserIdsRequest;
 import com.programm.vertx.request.GroupRequest;
 import com.programm.vertx.request.UserRequest;
@@ -40,6 +41,11 @@ public class Validators {
 
     public static final Validator<UserIdsRequest> GROUP_IDS_VALIDATOR = ValidatorBuilder.<UserIdsRequest>of()
             .forEach(UserIdsRequest::getUserIds, "userIds", c -> c.constraint(String::toString, "", c1 -> c1.notNull().uuid()))
+            .build();
+
+    public static final Validator<AuthRequest> AUTH_REQUEST_VALIDATOR = ValidatorBuilder.<AuthRequest>of()
+            .constraint(AuthRequest::getLogin, "login", CharSequenceConstraint::notBlank)
+            .constraint(AuthRequest::getPassword, "password", CharSequenceConstraint::notBlank)
             .build();
 
 }
