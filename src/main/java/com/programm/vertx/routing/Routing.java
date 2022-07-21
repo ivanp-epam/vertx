@@ -7,10 +7,7 @@ import com.programm.vertx.controllers.GroupsHandler;
 import com.programm.vertx.controllers.UserGroupHandler;
 import com.programm.vertx.controllers.UsersHandler;
 import com.programm.vertx.handler.errorHandlers.RouteHandlerManager;
-import com.programm.vertx.handler.middleware.GroupExistsMiddlewareHandler;
-import com.programm.vertx.handler.middleware.JWTAuthHandler;
-import com.programm.vertx.handler.middleware.JsonHandler;
-import com.programm.vertx.handler.middleware.ValidationHandler;
+import com.programm.vertx.handler.middleware.*;
 import com.programm.vertx.repository.IGroupRepository;
 import com.programm.vertx.repository.IRepositoryManager;
 import com.programm.vertx.repository.IUserGroupRepository;
@@ -26,24 +23,29 @@ import io.vertx.mutiny.ext.web.Route;
 import io.vertx.mutiny.ext.web.Router;
 import io.vertx.mutiny.ext.web.handler.BodyHandler;
 import io.vertx.mutiny.ext.web.handler.StaticHandler;
+import lombok.extern.slf4j.Slf4j;
 
 import static io.vertx.ext.web.handler.FileSystemAccess.RELATIVE;
 
+@Slf4j
 public class Routing {
 
     private final IDataBaseBootstrap dataBaseBootstrap;
     private final JwtAuthBootstrap authBootstrap;
 
     public Routing(IDataBaseBootstrap dataBaseBootstrap, JwtAuthBootstrap authBootstrap) {
+        log.info("Start Routing");
         this.dataBaseBootstrap = dataBaseBootstrap;
         this.authBootstrap = authBootstrap;
     }
 
     public Router routing(Vertx vertx) {
+        log.info("Start Router routing");
         Router router = Router.router(vertx);
 
         swagger(router);
         router.route().handler(BodyHandler.create());
+        router.route().handler(new LoggingMetadataAdd());
         router.route().handler(new JsonHandler());
         router.route("/api/*").subRouter(auth(vertx));
 

@@ -10,7 +10,9 @@ import io.smallrye.mutiny.vertx.core.AbstractVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Vertx;
 import io.vertx.mutiny.core.http.HttpServer;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MainVerticle extends AbstractVerticle {
 
     public Uni<Void> asyncStart() {
@@ -25,10 +27,12 @@ public class MainVerticle extends AbstractVerticle {
                 // Start listening
                 .listen(appConfig.getHttp().getPort())
                 // Print the port
-                .onItem().invoke((httpServer) ->
-                        System.out.println(
-                                "HTTP server started on port " + httpServer.actualPort()
-                        )
+                .onItem().invoke((httpServer) -> {
+                            log.info("HTTP server started on port {}", httpServer.actualPort());
+                            System.out.println(
+                                    "HTTP server started on port " + httpServer.actualPort()
+                            );
+                        }
                 );
 
         return Uni.combine().all().unis(dataBaseBootstrap.bootstrap(), startHttpServer).discardItems();
