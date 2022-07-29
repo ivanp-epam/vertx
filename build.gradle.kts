@@ -4,6 +4,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 plugins {
   java
   application
+  jacoco
   id("io.freefair.lombok") version "6.5.0.3"
   id("com.github.johnrengelman.shadow") version "7.0.0"
   id("org.liquibase.gradle") version "2.0.4"
@@ -83,16 +84,60 @@ val dbDriver: String by project.extra.properties
 liquibase {
   activities.register("main") {
     this.arguments = mapOf(
-            "logLevel" to "info",
-            "changeLogFile" to "src/main/resources/db/changelog.xml",
-            "url" to dbUrl,
-            "username" to dbUser,
-            "password" to dbPassword,
-            "driver" to "org.postgresql.Driver"
+      "logLevel" to "info",
+      "changeLogFile" to "src/main/resources/db/changelog.xml",
+      "url" to dbUrl,
+      "username" to dbUser,
+      "password" to dbPassword,
+      "driver" to "org.postgresql.Driver"
     )
   }
   runList = "main"
 }
+
+//tasks.withType<Test> {
+//  configure<JacocoTaskExtension> {
+//    isIncludeNoLocationClasses = true
+//  }
+//}
+
+tasks.test {
+  finalizedBy(":jacocoTestReport")
+}
+//
+//jacoco {
+//  toolVersion = "0.8.6"
+//  //reportsDirectory = file("$buildDir/report/")
+//}
+tasks.jacocoTestReport {
+  dependsOn(":test")
+
+  reports {
+    xml.required.set(false)
+    csv.required.set(true)
+
+    html.outputLocation.set(file("${buildDir}/reports/jacoco/Html"))
+    csv.outputLocation.set(file("${buildDir}/reports/jacoco/jacoco.csv"))
+  }
+}
+//////Test coverage Rule to make sure code coverage is 100 %
+//
+tasks.jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      element = "CLASS"
+      limit {
+        counter = "LINE"
+        value = "COVEREDRATIO"
+        minimum = 0.5.toBigDecimal()
+      }
+//      excludes = [
+//        'com.cicd.herokuautodeploy.model.*',
+//      ]
+    }
+  }
+}
+
 
 tasks.withType<ShadowJar> {
   archiveClassifier.set("fat")
