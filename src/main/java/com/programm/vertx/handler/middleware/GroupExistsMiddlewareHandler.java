@@ -21,8 +21,7 @@ public class GroupExistsMiddlewareHandler implements Consumer<RoutingContext> {
         }
 
         repository.get(uuid)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with((notUsed) -> ctx.next());
+                .subscribe().with((notUsed) -> ctx.next(), ctx::fail);
     }
 
     @Override

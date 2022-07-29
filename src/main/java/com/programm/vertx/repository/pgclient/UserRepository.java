@@ -178,23 +178,23 @@ public class UserRepository implements IUserRepository, IAuthRepository {
             executeCnt = client.preparedQuery(FIND_WITH_PREFIX_COUNT_SQL)
                     .execute(Tuple.of(startFrom));
         }
+        Uni<Map<String, UserResponse>> mapUni = execute
+                .onItem()
+                .transformToMulti(rows -> Multi.createFrom().iterable(rows))
+                .map(this::mapToUser)
+                .onItem()
+                .transformToUni(userResponse -> manager.getGroupRepository().getGroupsByUser(userResponse).map(userResponse::setGroups))
+                .merge()
+                .map(UserResponse::from)
+                .collect()
+                .asMap(UserResponse::getId, Function.identity());
 
-        return Uni.combine().all().unis(
-                execute
-                        .onItem()
-                        .transformToMulti(rows -> Multi.createFrom().iterable(rows))
-                        .map(this::mapToUser)
-                        .onItem()
-                        .transformToUni(userResponse -> manager.getGroupRepository().getGroupsByUser(userResponse).map(userResponse::setGroups))
-                        .merge()
-                        .map(UserResponse::from)
-                        .collect().asMap(UserResponse::getId, Function.identity()),
+        Uni<Integer> count = executeCnt
+                .map(RowSet::iterator)
+                .map(iterator -> iterator.next().getInteger("count"));
 
-                executeCnt
-                        .map(RowSet::iterator)
-                        .map(iterator -> iterator.next().getInteger("count"))
-
-        ).combinedWith((responseMap, i) -> new ResponsePaginatedWrapper<>(responseMap,
-                new Pagination(i, filter.getOffset(), filter.getLimit())));
+        return Uni.combine().all().unis(mapUni, count)
+                .combinedWith((responseMap, i) -> new ResponsePaginatedWrapper<>(responseMap,
+                        new Pagination(i, filter.getOffset(), filter.getLimit())));
     }
 }

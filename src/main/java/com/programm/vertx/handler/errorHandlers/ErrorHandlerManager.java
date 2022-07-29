@@ -7,15 +7,20 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Slf4j
-public class RouteHandlerManager implements Consumer<RoutingContext> {
+public class ErrorHandlerManager implements Consumer<RoutingContext> {
 
-    private final List<RouteHandlerSpecification> handlers = List.of(new HttpErrorHandler());
+    private final List<ErrorHandlerSpecification> handlers;
 
-    private final RouteHandlerSpecification defaultHandler = new DefaultHandler();
+    private final ErrorHandlerSpecification defaultHandler;
+
+    public ErrorHandlerManager(List<ErrorHandlerSpecification> handlers, ErrorHandlerSpecification defaultHandler) {
+        this.handlers = handlers;
+        this.defaultHandler = defaultHandler;
+    }
 
     public void handle(RoutingContext event) {
         log.warn("Handling error", event.failure());
-        for (RouteHandlerSpecification handler : handlers) {
+        for (ErrorHandlerSpecification handler : handlers) {
 
             if (!handler.isSatisfy(event)) {
                 continue;

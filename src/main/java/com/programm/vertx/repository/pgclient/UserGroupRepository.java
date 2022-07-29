@@ -64,7 +64,8 @@ public class UserGroupRepository implements IUserGroupRepository {
 
     public Uni<Void> removeAllUsersFromGroup(String groupId) {
         return pool.preparedQuery(SQL_REMOVE_ALL)
-                .execute(Tuple.of(groupId)).replaceWithVoid();
+                .execute(Tuple.of(groupId))
+                .replaceWithVoid();
     }
 
     public Uni<Void> setUsersToGroup(String groupId, List<String> userIds) {

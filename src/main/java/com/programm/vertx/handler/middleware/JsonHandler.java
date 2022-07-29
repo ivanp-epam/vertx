@@ -10,7 +10,7 @@ import static com.programm.vertx.helper.JsonHelper.isJSONValid;
 public class JsonHandler implements Consumer<RoutingContext> {
 
     public void handle(RoutingContext ctx) {
-        if (isJSONValid(ctx.getBodyAsString())) {
+        if (isJSONValid(ctx.body().asString())) {
             ctx.next();
             return;
         }

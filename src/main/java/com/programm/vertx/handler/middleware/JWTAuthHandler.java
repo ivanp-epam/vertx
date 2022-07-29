@@ -31,15 +31,13 @@ public class JWTAuthHandler implements Consumer<RoutingContext> {
         String token = bearerHeaders[1];
 
         jwtAuthProvider.checkJwtToken(token)
-                .onFailure().invoke(ctx::fail)
                 .map(Unchecked.function(user -> {
                     if (user.expired()) {
                         throw new UnauthorizedException();
                     }
                     return user;
                 }))
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with((unused) -> ctx.next());
+                .subscribe().with((unused) -> ctx.next(), ctx::fail);
 
     }
 

@@ -74,10 +74,6 @@ public class UserRepository implements IUserRepository {
         return Uni.createFrom().item(replace);
     }
 
-    public void clear() {
-        users = new HashMap<>();
-    }
-
     @Override
     public Uni<ResponsePaginatedWrapper<Map<String, UserResponse>>> findByPrefix(UsersFilterRequest filter) {
         Uni<Map<String, User>> all = this.findAll();
