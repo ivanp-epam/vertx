@@ -4,6 +4,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 plugins {
   java
   application
+  id("io.freefair.lombok") version "6.5.0.3"
   id("com.github.johnrengelman.shadow") version "7.0.0"
   id("org.liquibase.gradle") version "2.0.4"
 }
@@ -29,6 +30,9 @@ val jooqVersion = "3.16.6"
 val jooqRxVersion = "6.5.4"
 val jacksonDatabindVersion = "2.13.3"
 val postgresqlVersion = "42.3.6"
+val slf4jApiVersion = "1.7.36"
+val logbackVersion = "1.2.11"
+val logbackContribVersion = "0.1.5"
 
 application {
   mainClass.set(launcherClassName)
@@ -50,7 +54,11 @@ dependencies {
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-pg-client:$mutinyVertXVersion")
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-sql-client:$mutinyVertXVersion")
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-auth-jwt:$mutinyVertXVersion")
-  implementation("ch.qos.logback:logback-classic:1.2.11")
+  implementation("org.slf4j:slf4j-api:$slf4jApiVersion")
+  implementation("ch.qos.logback:logback-core:$logbackVersion")
+  implementation("ch.qos.logback:logback-classic:$logbackVersion")
+  implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
+  implementation("ch.qos.logback.contrib:logback-jackson:$logbackContribVersion")
   implementation("am.ik.yavi:yavi:0.11.3")
   implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}")
 
