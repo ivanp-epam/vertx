@@ -1,6 +1,8 @@
 = Nodejs-vertx
 
 image:https://img.shields.io/badge/vert.x-4.3.0-purple.svg[link="https://vertx.io"]
+image:.github/badges/branches.svg[alt="Branches coverage"]
+image:.github/badges/jacoco.svg[alt="Code coverage"]
 
 This application was generated using http://start.vertx.io
 
