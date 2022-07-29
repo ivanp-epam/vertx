@@ -19,7 +19,7 @@ public class ValidationHandler<T> implements Consumer<RoutingContext> {
     }
 
     public void handle(RoutingContext event) {
-        String entries = event.getBodyAsString();
+        String entries = event.body().asString();
 
         T object = JsonHelper.fromJsonObject(entries, clazz);
         ConstraintViolations validate = validator.validate(object);

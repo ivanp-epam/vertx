@@ -38,7 +38,7 @@ public class UsersHandler {
     }
 
     public void create(RoutingContext ctx) throws HttpException {
-        UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
+        UserRequest userRequest = Json.decodeValue(ctx.body().getDelegate().buffer(), UserRequest.class);
         Uni<User> dto = repository.add(User.from(userRequest));
 
         dto.map(UserResponse::from)
@@ -56,7 +56,7 @@ public class UsersHandler {
         String uuid = ctx.pathParam("id");
 
         Uni<User> user = repository.get(uuid);
-        UserRequest userRequest = Json.decodeValue(ctx.getBody().getDelegate(), UserRequest.class);
+        UserRequest userRequest = Json.decodeValue(ctx.body().getDelegate().buffer(), UserRequest.class);
 
         Uni<User> invoke = user
                 .map(userEl -> userEl.with(userRequest))

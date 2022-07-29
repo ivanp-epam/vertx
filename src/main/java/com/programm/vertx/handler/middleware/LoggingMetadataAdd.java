@@ -13,34 +13,45 @@ import java.util.function.Consumer;
 @Slf4j
 public class LoggingMetadataAdd implements Consumer<RoutingContext> {
 
+    private final String PROPERTY_START_TIME = "startTime";
+    private final String PROPERTY_REQUEST_ID = "requestId";
+
+    private final String METADATA_EXECUTION_TIME_MS = "execution_time_ms";
+    private final String METADATA_REQUEST_ID = "request_id";
+    private final String METADATA_CLIENT_IP = "client_ip";
+
+    private void generateStartTimeAndRequestId(RoutingContext event) {
+        event.put(PROPERTY_START_TIME, Instant.now());
+        event.put(PROPERTY_REQUEST_ID, UUID.randomUUID().toString());
+    }
+
+    private void fillAddedMetadata(RoutingContext event) {
+        Instant start = event.get(PROPERTY_START_TIME);
+        Instant end = Instant.now();
+        long delta = Duration.between(start, end).toMillis();
+
+        MDC.put(METADATA_EXECUTION_TIME_MS, String.valueOf(delta));
+        MDC.put(METADATA_REQUEST_ID, event.get(PROPERTY_REQUEST_ID));
+        MDC.put(METADATA_CLIENT_IP, event.request().remoteAddress().toString());
+    }
+
+    private void cleanupMetadata() {
+        MDC.clear();
+    }
+
     public void handle(RoutingContext event) {
-        log.info("Request OLOLOL");
-        event.put("startTime", Instant.now());
-        event.put("requestId", UUID.randomUUID().toString());
+        generateStartTimeAndRequestId(event);
+
         event.response().bodyEndHandler(() -> {
-            Instant start = event.get("startTime");
-            Instant end = Instant.now();
-            long delta = Duration.between(start, end).toMillis();
-            MDC.put("execution_time_ms", String.valueOf(delta));
-
-            MDC.put("requestId", event.get("requestId"));
-            MDC.put("client_ip", event.request().remoteAddress().toString());
-
-            log.info("Request Finished!!!");
-            MDC.clear();
+            fillAddedMetadata(event);
+            log.info("Request Finished!");
+            cleanupMetadata();
         });
 
         Infrastructure.setDroppedExceptionHandler(err -> {
-            Instant start = event.get("startTime");
-            Instant end = Instant.now();
-            long delta = Duration.between(start, end).toMillis();
-            MDC.put("execution_time_ms", String.valueOf(delta));
-
-            MDC.put("requestId", event.get("requestId"));
-            MDC.put("client_ip", event.request().remoteAddress().toString());
-
+            fillAddedMetadata(event);
             log.error("Mutiny dropped exception", err);
-            MDC.clear();
+            cleanupMetadata();
         });
 
         event.next();

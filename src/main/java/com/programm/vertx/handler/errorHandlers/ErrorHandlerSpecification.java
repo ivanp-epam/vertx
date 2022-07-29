@@ -4,7 +4,7 @@ import io.vertx.mutiny.ext.web.RoutingContext;
 
 import java.util.function.Consumer;
 
-public interface RouteHandlerSpecification extends Consumer<RoutingContext> {
+public interface ErrorHandlerSpecification extends Consumer<RoutingContext> {
 
-    public boolean isSatisfy(RoutingContext event);
+    boolean isSatisfy(RoutingContext event);
 }

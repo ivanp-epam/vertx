@@ -1,4 +1,4 @@
-package com.programm.vertx.handler.stub;
+package com.programm.vertx.handler.middleware.stub;
 
 public class StubClass2 {
     private String fieldA;

@@ -9,7 +9,7 @@ import io.vertx.mutiny.ext.web.RoutingContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class HttpErrorHandler implements RouteHandlerSpecification {
+public class HttpErrorHandler implements ErrorHandlerSpecification {
 
     @Override
     public boolean isSatisfy(RoutingContext event) {
@@ -17,6 +17,11 @@ public class HttpErrorHandler implements RouteHandlerSpecification {
     }
 
     public void handle(RoutingContext event) {
+        if (!isSatisfy(event)) {
+            event.next();
+            return;
+        }
+
         HttpServerResponse response = event.response();
 
         HttpException ex = (HttpException) event.failure();

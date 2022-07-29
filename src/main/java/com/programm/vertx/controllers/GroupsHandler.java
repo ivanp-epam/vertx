@@ -47,7 +47,7 @@ public class GroupsHandler {
 
         Uni<Group> user = repository.get(uuid);
 
-        GroupRequest groupRequest = Json.decodeValue(ctx.getBody().getDelegate(), GroupRequest.class);
+        GroupRequest groupRequest = Json.decodeValue(ctx.body().getDelegate().buffer(), GroupRequest.class);
 
         Uni<Group> invoke = user
                 .map(el -> Group.from(groupRequest).setId(el.getId()))

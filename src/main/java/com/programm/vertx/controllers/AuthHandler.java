@@ -23,7 +23,6 @@ public class AuthHandler {
                 .checkAuth(authRequest.getLogin(), authRequest.getPassword())
                 .replaceWith(() -> jwtAuthProvider.createJwtToken(authRequest))
                 .map(AuthResponse::new)
-                .onFailure().invoke(ctx::fail)
-                .subscribe().with(ctx::jsonAndForget);
+                .subscribe().with(ctx::jsonAndForget, ctx::fail);
     }
 }

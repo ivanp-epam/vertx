@@ -6,7 +6,9 @@ import com.programm.vertx.controllers.AuthHandler;
 import com.programm.vertx.controllers.GroupsHandler;
 import com.programm.vertx.controllers.UserGroupHandler;
 import com.programm.vertx.controllers.UsersHandler;
-import com.programm.vertx.handler.errorHandlers.RouteHandlerManager;
+import com.programm.vertx.handler.errorHandlers.DefaultHandler;
+import com.programm.vertx.handler.errorHandlers.HttpErrorHandler;
+import com.programm.vertx.handler.errorHandlers.ErrorHandlerManager;
 import com.programm.vertx.handler.middleware.*;
 import com.programm.vertx.repository.IGroupRepository;
 import com.programm.vertx.repository.IRepositoryManager;
@@ -24,6 +26,8 @@ import io.vertx.mutiny.ext.web.Router;
 import io.vertx.mutiny.ext.web.handler.BodyHandler;
 import io.vertx.mutiny.ext.web.handler.StaticHandler;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 import static io.vertx.ext.web.handler.FileSystemAccess.RELATIVE;
 
@@ -71,7 +75,7 @@ public class Routing {
     }
 
     public void errorHandler(Router router) {
-        router.route().failureHandler(new RouteHandlerManager());
+        router.route().failureHandler(new ErrorHandlerManager(List.of(new HttpErrorHandler()), new DefaultHandler()));
     }
 
     public Router users(Vertx vertx) {
